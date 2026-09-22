@@ -1,0 +1,1 @@
+[{"stepTitle": "卸载Lumio", "items": [{"type": "tips", "helpText": "请选择数据清理方式。"}, {"type": "radio", "field": "wizard_data_action", "label": "数据保留选项", "initValue": "keep", "options": [{"label": "保留数据（推荐 — 下次安装时可继续使用）", "value": "keep"}, {"label": "完全删除（包括孩子账号、积分流水、任务与设置）", "value": "delete"}], "rules": [{"required": true, "message": "请选择数据清理方式"}]}]}]

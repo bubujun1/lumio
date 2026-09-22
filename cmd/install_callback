@@ -1,0 +1,13 @@
+#!/bin/bash
+# 安装后回调：创建数据/运行时目录并启动服务（幂等：已运行则跳过）
+APPNAME="lumio"
+TRIM_APPDEST="${TRIM_APPDEST:-/var/apps/${APPNAME}}"
+TRIM_PKGHOME="${TRIM_PKGHOME:-/vol1/@apphome/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+mkdir -p "${TRIM_PKGHOME}/data" "${TRIM_PKGVAR}" 2>/dev/null
+echo "$(date '+%Y-%m-%d %H:%M:%S') - [install_callback] ready" >> "${LOG_FILE}" 2>/dev/null || true
+if [ -f "${TRIM_APPDEST}/cmd/main" ]; then
+    bash "${TRIM_APPDEST}/cmd/main" start >> "${LOG_FILE}" 2>&1
+fi
+exit 0

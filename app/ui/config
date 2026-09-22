@@ -1,0 +1,17 @@
+{
+    ".url": {
+        "lumio.Application": {
+            "title": "Lumio",
+            "icon": "images/icon_{0}.png",
+            "type": "iframe",
+            "protocol": "",
+            "gatewaySocket": "lumio.sock",
+            "gatewayPrefix": "/app/lumio",
+            "url": "/app/lumio",
+            "allUsers": true,
+            "control": {
+                "accessPerm": "readonly"
+            }
+        }
+    }
+}

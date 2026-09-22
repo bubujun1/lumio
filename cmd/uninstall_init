@@ -1,0 +1,12 @@
+#!/bin/bash
+# 卸载前回调：停止进程并移除 socket
+APPNAME="lumio"
+TRIM_APPDEST="${TRIM_APPDEST:-/var/apps/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+mkdir -p "${TRIM_PKGVAR}" 2>/dev/null
+echo "$(date '+%Y-%m-%d %H:%M:%S') - [uninstall_init] stopping" >> "${TRIM_PKGVAR}/info.log" 2>/dev/null || true
+pkill -TERM -f "${APPNAME}.*server\.js" 2>/dev/null || true
+sleep 1
+pkill -9 -f "${APPNAME}.*server\.js" 2>/dev/null || true
+rm -f "${TRIM_APPDEST}/${APPNAME}.sock" 2>/dev/null || true
+exit 0

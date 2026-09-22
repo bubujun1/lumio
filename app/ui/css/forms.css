@@ -1,0 +1,136 @@
+/* ============================================================
+   Lumio · forms.css —— 表单控件层
+   职责：时间类输入(datetime-local / month / date) 胶囊化 / 自定义日期滚轮选择器
+   层叠：第 4 加载（最后）
+   ============================================================ */
+
+/* ---------- 时间类输入（datetime-local / month / date）----------
+   原生控件在手机/桌面都偏生硬，统一包一层圆角胶囊 + 图标 + 柔和日历按钮 */
+.timefield{
+  display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);
+  border-radius:var(--r3);padding:0 8px 0 12px;transition:border-color .15s;
+}
+.timefield:focus-within{border-color:var(--pink2)}
+.timefield .tico{font-size:17px;flex:none;opacity:.9}
+.row .timefield{flex:1;min-width:168px}
+.timefield .tinp{
+  width:auto;flex:1;min-width:0;border:none;background:transparent;border-radius:0;
+  padding:10px 0;font-size:16px;font-weight:700;color:var(--ink);
+  font-variant-numeric:tabular-nums;letter-spacing:.2px;
+}
+.timefield .tinp:focus{outline:none}
+.tinp::-webkit-calendar-picker-indicator{
+  opacity:.5;cursor:pointer;padding:3px;border-radius:8px;transition:all .15s;
+}
+.tinp::-webkit-calendar-picker-indicator:hover{opacity:1;background:var(--pink1)}
+/* ---------- 自定义日期滚轮选择器（type=date 统一替换为「显示按钮 + 滚轮弹层」） ---------- */
+.datebox{position:relative;width:100%}
+.datebox-btn{
+  width:100%;min-height:40px;text-align:left;border:none;background:transparent;
+  padding:10px 0;font-size:16px;font-weight:700;color:var(--ink);
+  display:flex;align-items:center;gap:8px;cursor:pointer;font-variant-numeric:tabular-nums;
+}
+.datebox-btn .cal{font-size:17px;opacity:.9}
+.datebox-btn.placeholder{color:var(--ink3);font-weight:500}
+.dp-mask{
+  position:fixed;inset:0;background:rgba(74,59,79,.42);display:none;
+  align-items:center;justify-content:center;z-index:150;
+}
+.dp-mask.show{display:flex}
+.dp-card{background:var(--cream2);border-radius:var(--r2);width:min(348px,80vw);padding:16px 16px 14px;box-shadow:0 18px 50px rgba(74,59,79,.25)}
+.dp-title{text-align:center;font-size:15px;font-weight:800;color:var(--ink)}
+.dp-preview{text-align:center;font-size:13px;color:var(--pink3);font-weight:700;margin:3px 0 10px}
+.dp-wheel{position:relative;display:flex;gap:10px}
+.dp-band{
+  position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);
+  background:var(--pink1);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  border-radius:10px;pointer-events:none;z-index:2;
+}
+.dp-col{
+  position:relative;z-index:3;flex:1;height:132px;overflow-y:auto;scroll-snap-type:y mandatory;
+  border-radius:10px;background:#fff;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  -webkit-mask-image:linear-gradient(transparent,#000 32%,#000 68%,transparent);
+  mask-image:linear-gradient(transparent,#000 32%,#000 68%,transparent);
+  user-select:none;-webkit-user-select:none;scroll-behavior:auto;
+}
+.dp-col::-webkit-scrollbar{display:none}
+.dp-col ul{list-style:none;margin:0;padding:44px 0}
+.dp-col li{position:relative;height:44px;line-height:44px;text-align:center;font-size:16px;font-weight:600;color:var(--ink);scroll-snap-align:center;font-variant-numeric:tabular-nums}
+.dp-col li.cur{color:var(--pink3);font-weight:800;font-size:17px}
+/* v2.0.52：日期滚轮「今天」高亮（区别于选中态 .cur） */
+.dp-col li.today{background:var(--pink1)}
+.dp-col li.today::after{content:'今';position:absolute;top:3px;right:7px;font-size:10px;font-weight:800;color:var(--pink3);line-height:1}
+.dp-col.nosnap{scroll-snap-type:none}
+.dp-manual{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-size:13px;color:var(--ink2)}
+.dp-manual input{width:64px;padding:6px 8px;border:2px solid var(--line);border-radius:10px;font-size:14px;text-align:center;color:var(--ink);background:#fff}
+.dp-manual input:focus{outline:none;border-color:var(--pink2)}
+.dp-acts{display:flex;gap:10px;margin-top:12px}
+.dp-acts .btn{flex:1;justify-content:center}
+/* 快捷时间选项 */
+.quickrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.quickrow .qbtn{
+  border:2px solid var(--line);background:#fff;color:var(--ink2);border-radius:999px;
+  padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .14s;
+}
+.quickrow .qbtn:active{transform:translateY(1px)}
+.quickrow .qbtn.on{border-color:var(--pink2);background:var(--pink1);color:var(--pink3)}
+
+/* 限时任务倒计时 */
+.deadline{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:#c86a37}
+.deadline.soon{color:#e0524f}
+
+/* 提示条：水平居中用 left/right+margin:auto（pop 动画覆盖 transform 后依然居中） */
+.toast-wrap{position:fixed;left:0;right:0;margin:0 auto;width:fit-content;max-width:90vw;top:14px;z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  position:static;left:auto;right:auto;margin:0;width:fit-content;max-width:90vw;
+  background:#4A3B4F;color:#fff;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700;
+  box-shadow:0 8px 22px rgba(74,59,79,.3);animation:pop .22s ease both;text-align:center;
+  display:flex;align-items:center;gap:7px;transition:opacity .2s,transform .2s;
+}
+.toast .ti{font-weight:800;font-size:15px;line-height:1}
+.toast.ok{background:#3fae83}
+.toast.err{background:#e8604f}
+.toast.warn{background:#e0913c}
+
+/* 启动/占位 */
+.boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center}
+.boot .lumio-mascot{width:190px;max-width:56vw}
+.boot h2{margin:0;font-size:19px;font-weight:800}
+.boot p{margin:0;color:var(--ink2);font-size:14px;max-width:420px}
+.ub-box{
+  background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin-top:6px;
+  width:100%;max-width:400px;text-align:left;
+}
+.kv{display:flex;gap:10px;padding:8px 0;border-bottom:2px dashed var(--line);font-size:14px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--ink2);flex:none;min-width:96px}
+.kv .v{font-weight:700;word-break:break-all}
+.copybox{
+  background:var(--cream);border:2px dashed var(--pink2);border-radius:14px;padding:11px 13px;
+  font-weight:800;font-size:16px;text-align:center;letter-spacing:.5px;cursor:pointer;margin-top:4px;
+}
+
+.lumio-hero{text-align:center;margin:-2px 0 4px}
+.lumio-hero svg{width:96px;height:auto}
+/* v2.0.46 孩子端任务行紧凑化：原「一张大卡一个任务」（图标+状态胶囊+积分金卡+进度条+截止+整宽按钮）
+   压成单行 —— 状态全部交给右侧按钮表达，次数/期限 + 至多积分并入副行文字，一屏可见 5~6 条。
+   原 .rwdbadge（至多积分金卡）与 .tprog（进度条）随之废弃，已一并移除。 */
+.trow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:2px solid var(--line)}
+.trow:last-child{border-bottom:none}
+.trow .ti{width:42px;height:42px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--sun1)}
+.trow .tm{flex:1;min-width:0}
+.trow .tt{font-weight:800;font-size:14.5px;line-height:1.3;word-break:break-word}
+.trow .ts{font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.45}
+.trow .ta{flex:none;display:flex;align-items:center;justify-content:flex-end}
+/* 手机端触控目标 ≥40px */
+.trow .ta .btn{min-height:40px;padding:0 14px;font-size:12.5px;border-radius:999px;white-space:nowrap}
+.lempty{text-align:center;padding:22px 10px;color:var(--ink3)}
+.lempty .le-hero svg{width:84px;height:auto;margin-bottom:2px}
+.lempty .le-t{font-size:14px;font-weight:700;margin-top:2px}
+.gostrip{background:linear-gradient(140deg,#fff,#F3EEFF);border-radius:var(--r2);box-shadow:var(--sh2);padding:10px 12px;margin-bottom:12px}
+.gostrip-i{display:flex;align-items:center;gap:10px;padding:4px 0}
+.gostrip-e{font-size:24px;flex:none}
+.gostrip-body{flex:1;min-width:0}
+.gostrip-t{font-size:13px;font-weight:800;color:#6b52c4}
+.gostrip-bar{height:9px;background:#E9E1FF;border-radius:999px;overflow:hidden;margin-top:4px}
+.gostrip-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#C4B0FF,#9C82EE)}

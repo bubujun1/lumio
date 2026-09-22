@@ -1,0 +1,33 @@
+/* Lumio · 组件层 · 任务/审核 */
+.grid4{display:grid;grid-template-columns:1fr;gap:10px}
+.grid4 .review{margin-bottom:0}
+/* 网格项必须允许收缩，否则长内容会把轨道撑宽导致不等宽 */
+.grid4>*{min-width:0}
+/* 任务卡：纵向排布，复用 .shopcard 等宽思路 */
+/* v2.0.59：任务卡加外框，与 .stat 用同一套 border:2px solid var(--bd)，卡片之间清晰分隔；
+   同时去掉 min-height:148px —— v2.0.58 把积分挪进卡头后卡片自然高度变小，
+   原 148px 下限 + .tc-btns 的 margin-top:auto 会在「编辑 / 下架」上方顶出一段空白。 */
+.taskcard{background:#fff;border:2px solid var(--bd);border-radius:var(--r2);box-shadow:var(--sh2);padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.taskcard .tc-top{display:flex;align-items:center;gap:9px}
+.taskcard .ii{width:40px;height:40px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:var(--cream)}
+.taskcard .mid{flex:1;min-width:0}
+.taskcard .t{font-weight:800;font-size:14px;line-height:1.3;word-break:break-word}
+.taskcard .s{font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.3}
+.taskcard .pricetag{font-weight:800;color:#c98a1b}
+/* v2.0.58：积分从单独一行挪到卡头右侧（不再单占一行） */
+.taskcard .tc-top .pricetag{flex:none;font-size:14px}
+/* v2.0.59：去掉 margin-top:auto —— 否则同一行内被拉高的卡片会在按钮上方留出空白 */
+.taskcard .tc-btns{display:flex;gap:6px}
+.taskcard .tc-btns .btn{flex:1;min-width:0;padding-left:4px;padding-right:4px}
+.taskcat{display:flex;align-items:center;gap:8px;margin:14px 2px 9px;font-weight:800;font-size:14.5px;color:var(--sect)}
+.taskcat:first-child{margin-top:0}
+.taskcat .cs{flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--sectline),transparent)}
+/* 审核/待处理卡：v2.0.69 改对齐 .taskcard —— 满框 2px 边框（不再左侧 6px 色条）、内距 12px、纵向 flex、等宽按钮行 */
+.review{background:#fff;border:2px solid var(--bd);border-radius:var(--r2);box-shadow:var(--sh2);padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:9px;min-width:0;position:relative}
+.review .rh{display:flex;align-items:center;gap:10px}
+.review .rt{font-weight:800;font-size:14px;flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.review .rt .rtt{min-width:0;flex:1 1 auto;line-height:1.3;word-break:break-word}
+.review .rt .chip{font-size:12px;padding:3px 9px;flex:none}
+/* 等宽按钮行，与 .taskcard .tc-btns 一致 */
+.review .row{display:flex;gap:8px}
+.review .row .btn{flex:1;min-width:0;padding-left:4px;padding-right:4px}

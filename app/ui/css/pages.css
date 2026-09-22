@@ -1,0 +1,123 @@
+/* ============================================================
+   Lumio · pages.css —— 页面层
+   职责：品牌与积分摘要条 / 消息页(三入口·气泡·微信风格) 等页面专属样式
+   层叠：第 3 加载
+   ============================================================ */
+
+/* ---------- 品牌 / 积分摘要条 ---------- */
+.herostrip{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  margin:0;padding:11px 16px;background:var(--stripbg);
+  border-bottom:2px solid var(--line);
+}
+.herostrip .ps-ava{
+  width:42px;height:42px;flex:none;border-radius:15px;display:flex;align-items:center;justify-content:center;
+  font-size:23px;background:rgba(255,255,255,.85);box-shadow:var(--sh2);
+}
+.herostrip .ps-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.herostrip .ps-bal{font-size:19px;font-weight:800;color:#c98a1b;line-height:1.1}
+.herostrip .ps-bal i{font-size:11.5px;font-style:normal;font-weight:700;color:var(--ink2)}
+.herostrip .ps-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.85);overflow:hidden;box-shadow:inset 0 1px 3px rgba(74,59,79,.09)}
+.herostrip .ps-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#FFD97D,#FF9E9E);transition:width .5s}
+.herostrip .ps-sub{font-size:11px;color:var(--ink2);font-weight:700}
+.herostrip .ps-fire{flex:none;font-size:13px;font-weight:800;color:#e0913c}
+.herostrip .ps-more{flex:none;font-size:12px;font-weight:800;color:var(--pink3)}
+
+/* v2.0.50：孩子端固定页头——位于顶栏下方、滚动区（.scroll）之外，与顶栏衔接为同一常驻区，
+   随 .main 的 flex 列布局天然不滚动（任务=我的任务+待确认 / 消息=留言·审核·积分 / 商城=奖励商城） */
+.pagehead{
+  flex:none;display:flex;align-items:center;gap:9px;
+  padding:9px 16px;background:var(--stripbg);border-bottom:2px solid var(--line);
+}
+.pagehead .ph-ico{font-size:19px;flex:none;line-height:1}
+.pagehead .ph-t{margin:0;font-size:15.5px;font-weight:800;flex:1;min-width:0;letter-spacing:.2px}
+.pagehead .chip{flex:none}
+.pagehead .btn{flex:none}
+/* v2.0.51：功能入口不再需要外层白椭圆底衬——外观统一由 .seg / .seg-b 自身表达 */
+
+/* ---------- 消息页三个功能入口（留言 / 审核 / 积分） ----------
+   v2.0.51：去掉外层白色椭圆胶囊，三个入口直接铺在固定条上，靠等分网格 + 细分隔线区分；
+   三者宽度、命中区（44px）、字号字重、文字色完全一致（层级一致），选中态只加主色 + 底部指示条 */
+.seg{flex:1;min-width:0;max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg-b{
+  position:relative;display:flex;align-items:center;justify-content:center;gap:5px;
+  min-height:44px;padding:0 4px;border-radius:11px;
+  font-size:13.5px;font-weight:800;color:var(--ink2);white-space:nowrap;
+  transition:color .14s,background-color .14s;
+}
+.seg-b + .seg-b::before{
+  content:'';position:absolute;left:0;top:50%;margin-top:-9px;width:1.5px;height:18px;background:var(--line);
+}
+.seg-b.on{color:var(--pink3)}
+.seg-b.on::after{
+  content:'';position:absolute;left:24%;right:24%;bottom:6px;height:3px;border-radius:3px;background:var(--pink);
+}
+.seg-b .bd{
+  display:inline-block;margin-left:2px;background:#FF6B6B;color:#fff;border-radius:999px;
+  min-width:16px;height:16px;line-height:16px;font-size:11px;padding:0 4px;
+}
+
+/* ---------- 对话气泡 ---------- */
+.chat{display:flex;flex-direction:column;gap:11px;padding:2px 0}
+.chatline{
+  max-width:82%;align-self:flex-start;background:#fff;border:2px solid var(--pink1);
+  border-radius:16px;padding:6px 12px;box-shadow:var(--sh2);
+}
+.chatline.me{
+  align-self:flex-end;background:linear-gradient(140deg,#E6F6EE,#D8F1E5);
+  border-color:#BFE9D6;border-radius:16px;
+}
+.chatline .who{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:3px}
+.chatline .txt{font-size:14.5px;line-height:1.55;word-break:break-word}
+.chatline .to{font-size:11px;color:var(--ink3);margin-top:4px;text-align:right}
+
+/* ---------- 消息：微信风格 ---------- */
+/* 会话列表行：头像(带未读红点) + 名称 + 单行预览 + 右侧时间 */
+.wxrow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:2px solid var(--line);cursor:pointer}
+.wxrow.is-dim{opacity:.5}
+.wxrow:last-child{border-bottom:none}
+.wxrow:active{background:var(--pink1)}
+.wxava{
+  position:relative;width:48px;height:48px;flex:none;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;font-size:25px;background:var(--pink1);
+}
+.wxava .wcdot{
+  position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;
+  background:#FF6B6B;color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 0 2px #fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.wxbody{flex:1;min-width:0}
+.wxhead{display:flex;align-items:baseline;gap:8px}
+.wxname{font-weight:800;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wxtime{font-size:11.5px;color:var(--ink3);flex:none}
+.wxprev{font-size:13px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 气泡带双方头像（微信聊天观感） */
+.wxline{display:flex;gap:9px;align-items:flex-start;max-width:100%}
+.wxline.me{flex-direction:row-reverse}
+.wxline .wxava2{
+  width:38px;height:38px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;background:var(--pink1);box-shadow:var(--sh2);
+}
+.wxcol{display:flex;flex-direction:column;gap:3px;max-width:78%;min-width:0}
+.wxline.me .wxcol{align-items:flex-end}
+.wxline .wxwho{font-size:11px;font-weight:800;color:var(--ink3)}
+.wxcol .chatline{max-width:100%;width:fit-content;align-self:auto}
+
+/* 心愿卡：进度条 + 等宽操作 */
+.wish{background:#fff;border-radius:var(--r2);box-shadow:var(--sh2);padding:13px;margin-bottom:11px}
+.wish .wh{display:flex;gap:10px;align-items:center}
+.wish .wava{width:44px;height:44px;flex:none;border-radius:14px;background:var(--grape1);display:flex;align-items:center;justify-content:center;font-size:22px}
+.wish .wmid{flex:1;min-width:0}
+.wish .wt{font-weight:800;font-size:14.5px;line-height:1.35;word-break:break-word}
+.wish .ws{font-size:12px;color:var(--ink2);margin-top:2px}
+.wish .wbar{height:10px;border-radius:999px;background:var(--neu);overflow:hidden;margin-top:8px}
+.wish .wfill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#C4B0FF,#9C82EE);transition:width .6s}
+.wish .wacts{display:flex;gap:8px;margin-top:11px}
+.wish .wacts .btn{flex:1;min-width:0}
+
+/* 审核卡头像：v2.0.69 对齐 .taskcard .ii（40×40 / 圆角13 / 21px），保留孩子色块背景 */
+.review .rava{width:40px;height:40px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:var(--sun1)}
+.review.r .rava{background:var(--grape1)}
+.review .rmid{flex:1;min-width:0}
+

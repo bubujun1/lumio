@@ -1,0 +1,19 @@
+/* Lumio · 组件层 · 商城 */
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.shopcard{
+  background:#fff;border-radius:var(--r2);box-shadow:var(--sh2);padding:12px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;min-height:150px;min-width:0;
+}
+/* v2.0.34：撤销「宽屏锁正方高」——列宽 178~215px 时正方高装不下内容（约 217px），
+   flex 会把 .em 图标面板压扁（62→45）、把商品名行盒压到 12px 造成文字被裁；
+   改为高度由内容决定，同行卡片由 grid stretch 自然等高。 */
+.shopcard .em{flex:none;font-size:36px;text-align:center;line-height:1;margin:4px auto 6px;width:56px;height:56px;border-radius:16px;background:linear-gradient(140deg,#FFF3D8,#FFE3A8);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 3px rgba(255,255,255,.7),0 2px 6px rgba(240,163,47,.18)}
+.shopcard .nm{flex:none;font-weight:800;font-size:13.5px;text-align:center;line-height:1.25;
+  width:100%;white-space:nowrap;overflow:hidden;word-break:break-word}
+.shopcard .pr{flex:none;text-align:center}
+.shopcard .st{flex:none;font-size:11.5px;color:var(--ink3);text-align:center;line-height:1.3}
+.shopcard .go{margin-top:auto;width:100%;display:flex;gap:6px}
+.shopcard .go .btn{flex:1;min-width:0;padding-left:4px;padding-right:4px}
+/* 家长端卡片的「编辑 / 删除」：等宽占满一行（此前缺这条样式，按钮不受控把卡片顶变形） */
+.shopbtns{margin-top:auto;width:100%;display:flex;gap:6px}
+.shopbtns .btn{flex:1;min-width:0;padding-left:4px;padding-right:4px}

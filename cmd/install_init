@@ -1,0 +1,17 @@
+#!/bin/bash
+# 安装前回调：停止残留进程并清理 socket，避免文件句柄占用导致覆盖失败
+APPNAME="lumio"
+TRIM_APPDEST="${TRIM_APPDEST:-/var/apps/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+mkdir -p "${TRIM_PKGVAR}" 2>/dev/null
+echo "$(date '+%Y-%m-%d %H:%M:%S') - [install_init] start" >> "${LOG_FILE}" 2>/dev/null || true
+pkill -TERM -f "${APPNAME}.*server\.js" 2>/dev/null || true
+sleep 1
+pkill -9 -f "${APPNAME}.*server\.js" 2>/dev/null || true
+for _i in $(seq 1 10); do
+    pgrep -f "${APPNAME}.*server\.js" >/dev/null 2>&1 || break
+    sleep 1
+done
+rm -f "${TRIM_APPDEST}/${APPNAME}.sock" "${TRIM_PKGVAR}/app.pid"
+exit 0

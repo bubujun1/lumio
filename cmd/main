@@ -1,0 +1,111 @@
+#!/bin/bash
+# Lumio — 生命周期管理 (start / stop / status)
+# fnOS 统一网关经 /app/lumio 把 HTTP 请求转发到 ${TRIM_APPDEST}/lumio.sock
+set -u
+
+APPNAME="lumio"
+TRIM_APPDEST="${TRIM_APPDEST:-/var/apps/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+TRIM_PKGHOME="${TRIM_PKGHOME:-/vol1/@apphome/${APPNAME}}"
+
+SOCKET_PATH="${TRIM_APPDEST}/${APPNAME}.sock"
+PID_FILE="${TRIM_PKGVAR}/app.pid"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+SERVER_JS="${TRIM_APPDEST}/server/server.js"
+
+# install_dep_apps=nodejs_v24 把 Node 装在 /var/apps/nodejs_v24/target/bin/
+# 该路径不会自动加入 PATH，必须显式定位
+find_node() {
+    command -v node >/dev/null 2>&1 && { command -v node; return; }
+    local cand
+    for cand in \
+        /var/apps/nodejs_v24/target/bin/node \
+        /var/apps/nodejs_v22/target/bin/node \
+        /var/apps/nodejs_v20/target/bin/node \
+        /vol1/@appcenter/nodejs_v24/bin/node \
+        /vol1/@appcenter/nodejs_v22/bin/node \
+        /usr/local/bin/node ; do
+        [ -x "$cand" ] && { echo "$cand"; return; }
+    done
+    # 通配兜底：防止将来 nodejs_v 版本号变化导致找不到运行时
+    for cand in /var/apps/nodejs_v*/target/bin/node ; do
+        [ -x "$cand" ] && { echo "$cand"; return; }
+    done
+    echo ""
+}
+
+log_msg() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "${LOG_FILE}" 2>/dev/null || true; }
+
+start_process() {
+    if status; then log_msg "already running"; return 0; fi
+    local NODE_BIN
+    NODE_BIN="$(find_node)"
+    if [ -z "${NODE_BIN}" ]; then
+        log_msg "[错误] 未找到 node 运行时（install_dep_apps=nodejs_v24 应已安装）"
+        return 1
+    fi
+    mkdir -p "${TRIM_PKGVAR}" "${TRIM_PKGHOME}/data" 2>/dev/null
+    rm -f "${SOCKET_PATH}"
+    log_msg "Starting Lumio (node=${NODE_BIN}) ..."
+    MONITOR_SOCKET_PATH="${SOCKET_PATH}" \
+    APP_DIR="${TRIM_APPDEST}" \
+    DATA_DIR="${TRIM_PKGHOME}/data" \
+    VAR_DIR="${TRIM_PKGVAR}" \
+    BASE_PATH="/app/${APPNAME}" \
+    APPNAME="${APPNAME}" \
+    PATH="$(dirname "${NODE_BIN}"):/usr/local/bin:/usr/bin:/bin" \
+    nohup "${NODE_BIN}" "${SERVER_JS}" >> "${LOG_FILE}" 2>&1 &
+    local pid=$!
+    printf "%s" "$pid" > "${PID_FILE}"
+    local i
+    for i in $(seq 1 40); do
+        if [ -S "${SOCKET_PATH}" ]; then
+            chmod 777 "${SOCKET_PATH}" 2>/dev/null
+            log_msg "Started pid=${pid} socket=${SOCKET_PATH}"
+            return 0
+        fi
+        # 后端在启动阶段就退出 → 立刻报错，避免"进程假活 + 无 socket"的静默超时
+        if ! kill -0 "${pid}" 2>/dev/null; then
+            log_msg "ERROR: backend exited during startup (见 ${LOG_FILE} 中 server.js 的输出)"
+            return 1
+        fi
+        sleep 0.25
+    done
+    log_msg "WARNING: socket 10s 内未创建，请查看 ${LOG_FILE}"
+    return 1
+}
+
+stop_process() {
+    if [ -r "${PID_FILE}" ]; then
+        local pid
+        pid="$(head -n1 "${PID_FILE}" | tr -d '[:space:]')"
+        if [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null; then
+            kill -TERM "${pid}" 2>/dev/null
+            local i
+            for i in $(seq 1 10); do
+                sleep 1
+                kill -0 "${pid}" 2>/dev/null || { rm -f "${PID_FILE}" "${SOCKET_PATH}"; log_msg "Stopped"; return 0; }
+            done
+            kill -KILL "${pid}" 2>/dev/null || true
+        fi
+        rm -f "${PID_FILE}"
+    fi
+    pkill -SIGKILL -f "${APPNAME}.*server\.js" 2>/dev/null || true
+    rm -f "${SOCKET_PATH}"
+    return 0
+}
+
+status() {
+    [ -f "${PID_FILE}" ] \
+        && local pid \
+        && pid="$(head -n1 "${PID_FILE}" | tr -d '[:space:]')" \
+        && [ -n "${pid}" ] \
+        && kill -0 "${pid}" 2>/dev/null
+}
+
+case "$1" in
+    start)  start_process ;;
+    stop)   stop_process ;;
+    status) status && exit 0 || exit 3 ;;
+    *)      exit 1 ;;
+esac

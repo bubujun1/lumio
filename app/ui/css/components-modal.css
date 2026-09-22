@@ -1,0 +1,41 @@
+/* Lumio · 组件层 · 弹窗框架 */
+.mask{
+  position:fixed;inset:0;background:rgba(74,59,79,.42);z-index:100;
+  display:flex;align-items:flex-end;justify-content:center;padding:0;
+  animation:pop .2s ease both;
+}
+.modal{
+  width:100%;max-width:560px;background:var(--cream2);
+  border:2px solid var(--bd);border-bottom:none;
+  border-radius:26px 26px 0 0;max-height:92%;
+  overflow:hidden;padding:0;display:flex;flex-direction:column;min-height:0;
+  animation:pop .26s cubic-bezier(.2,.9,.3,1) both;
+}
+.modal > h2{
+  flex:none;background:var(--cream2);
+  margin:0;padding:17px 18px 11px;font-size:17px;font-weight:800;
+  border-bottom:2px solid var(--line);
+  position:relative;padding-right:58px;
+}
+.modal > h2 .mtitle{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal .mx{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;border-radius:50%;flex:none;
+  background:#fff;border:2px solid var(--neu2);color:var(--ink2);
+  font-size:15px;font-weight:800;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal .mx:active{transform:translateY(-50%) scale(.9)}
+#modalBody{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;padding:14px 18px;
+}
+.modal-actions{
+  flex:none;background:var(--cream2);
+  margin:0;padding:12px 18px calc(16px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;border-top:2px solid var(--line);
+}
+.modal-actions .btn{flex:1}
+/* v2.0.47 单枚模式（okOnly）：纯告知弹窗底部只留一枚，居中且不撑满整行 */
+.modal-actions.one{justify-content:center}
+.modal-actions.one .btn{flex:0 0 auto;min-width:150px;padding-left:26px;padding-right:26px}

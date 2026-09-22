@@ -1,0 +1,22 @@
+#!/bin/bash
+# 卸载后回调：根据用户在卸载向导中的选择决定是否删除数据
+set -u
+
+APPNAME="lumio"
+TRIM_PKGHOME="${TRIM_PKGHOME:-/vol1/@apphome/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+TRIM_PKGETC="${TRIM_PKGETC:-/vol1/@appconf/${APPNAME}}"
+
+# 读取卸载向导中用户的选择（wizard/uninstall 中定义的 wizard_data_action 字段）
+ACTION="${wizard_data_action:-}"
+
+if [ "$ACTION" = "delete" ]; then
+  # 用户选择「完全删除」— 清除所有数据
+  rm -rf "${TRIM_PKGHOME}" "${TRIM_PKGVAR}" "${TRIM_PKGETC}" 2>/dev/null || true
+else
+  # 默认/选择「保留数据」— 仅清理运行时文件（PID、日志、socket），保留用户数据
+  rm -f "${TRIM_PKGVAR}/app.pid" "${TRIM_PKGVAR}/info.log" "${TRIM_PKGVAR}/app.log" 2>/dev/null || true
+  # TRIM_PKGHOME/data 目录（db.json）完整保留
+fi
+
+exit 0

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-base="__APP_BASE__">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#FFF7EE">
+<title>Lumio</title>
+<link rel="stylesheet" href="__APP_BASE__/css/base.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-cards.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-modal.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-chat.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-progress.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-shop.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-task.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-goal.css">
+<link rel="stylesheet" href="__APP_BASE__/css/components-controls.css">
+<link rel="stylesheet" href="__APP_BASE__/css/pages.css">
+<link rel="stylesheet" href="__APP_BASE__/css/forms.css">
+<link rel="stylesheet" href="__APP_BASE__/css/mobile.css">
+<link rel="stylesheet" href="__APP_BASE__/css/tablet.css">
+<link rel="stylesheet" href="__APP_BASE__/css/desktop.css">
+</head>
+<body>
+<div id="boot" class="boot">
+  <div class="lumio-mascot anim-float" id="bootHero"></div>
+  <h2>Lumio 正在醒来…</h2>
+  <p class="tiny muted" style="letter-spacing:.6px">Lumio · 一点点积攒微光</p>
+  <p>正在读取你的飞牛账号信息</p>
+</div>
+<div id="app" class="hidden" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
+<div class="dp-mask" id="dpMask">
+  <div class="dp-card">
+    <div class="dp-title" id="dpTitle">选择日期</div>
+    <div class="dp-preview" id="dpPreview"></div>
+    <div class="dp-wheel">
+      <div class="dp-band"></div>
+      <div class="dp-col" id="dpColY"></div>
+      <div class="dp-col" id="dpColM"></div>
+      <div class="dp-col" id="dpColD"></div>
+    </div>
+    <div class="dp-manual">
+      <input id="dpInY" type="number" min="1900" max="2999">年
+      <input id="dpInM" type="number" min="1" max="12">月
+      <input id="dpInD" type="number" min="1" max="31">日
+    </div>
+    <div class="dp-acts">
+      <button class="btn ghost" type="button" id="dpBtnClear">清除</button>
+      <button class="btn ghost" type="button" id="dpBtnCancel">取消</button>
+      <button class="btn sun" type="button" id="dpBtnOk">设置</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="__APP_BASE__/js/main.js"></script>
+</body>
+</html>

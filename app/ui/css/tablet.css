@@ -1,0 +1,9 @@
+/* ============================================================
+   Lumio · tablet.css —— 平板 / 中大屏（≥560px）网格列数适配层
+   职责：手机单列基础上，≥560px 进入多列网格；列数进一步由 desktop.css 覆盖
+   加载顺序：base → components → pages → forms → mobile → tablet → desktop
+   ============================================================ */
+
+@media (min-width:560px){ .grid2{grid-template-columns:repeat(3,1fr)} }
+
+@media (min-width:560px){ .grid4{grid-template-columns:repeat(2,1fr)} }

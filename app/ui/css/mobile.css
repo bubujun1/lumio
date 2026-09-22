@@ -1,0 +1,31 @@
+/* ============================================================
+   Lumio · mobile.css —— 手机端（≤560px / ≤400px）适配层
+   职责：仅手机生效的响应式规则；平板/桌面永不进入这些媒体查询
+   加载顺序：base → components → pages → forms → mobile → tablet → desktop
+   ============================================================ */
+
+/* v2.0.66：手机端任务卡 —— 编辑入口 / 上下架位置 / 卡片外框 回退至 v2.0.61（= base .taskcard 原样：
+   列布局 + 圆角厚边框 + 底边横向「编辑 / 上下架」按钮）；仅保留 v2.0.62 引入的「卡片上下连接」视觉
+   （零间隙 + 边框重合），不动审核卡、桌面/平板。 */
+@media (max-width:560px){
+  .taskgrid{gap:0}
+  .taskgrid .taskcard{
+    margin-bottom:-1px;            /* 相邻卡片边框重合，连成一条紧凑列表（沿用当前） */
+  }
+}
+
+@media (max-width:400px){
+  /* v2.0.60：.stats / .stat .v 随 components.css 中 .stats/.stat 整块删除一并移除（零引用） */
+  .shopcard .nm{font-size:12.5px}
+  .tab{font-size:11.5px}
+  .tab .ti{font-size:17.5px}
+  .topbar{padding:10px 10px;gap:7px}
+  .topbar h1{font-size:16px}
+  .topbar .chip{font-size:11.5px;padding:3px 8px;gap:3px}
+  .topbar .wtxt{display:none}
+  .themesw{padding:5px 7px;gap:10px}
+  .tsw{width:19px;height:19px}
+  .seg-b{font-size:12.5px}
+  .pagehead{padding:8px 10px;gap:7px}
+  .pagehead .ph-t{font-size:15px}
+}

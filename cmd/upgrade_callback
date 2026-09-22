@@ -1,0 +1,16 @@
+#!/bin/bash
+# 升级后回调：启动新版本服务
+APPNAME="lumio"
+TRIM_APPDEST="${TRIM_APPDEST:-/var/apps/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+log_msg() { echo "$(date '+%Y-%m-%d %H:%M:%S') - [upgrade_callback] $1" >> "${LOG_FILE}" 2>/dev/null || true; }
+log_msg "=== upgrade_callback start ==="
+mkdir -p "${TRIM_PKGVAR}" 2>/dev/null
+if [ -f "${TRIM_APPDEST}/cmd/main" ]; then
+    bash "${TRIM_APPDEST}/cmd/main" start >> "${LOG_FILE}" 2>&1
+else
+    log_msg "错误: ${TRIM_APPDEST}/cmd/main 不存在，无法启动服务"
+fi
+log_msg "=== upgrade_callback done ==="
+exit 0

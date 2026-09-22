@@ -1,0 +1,41 @@
+/* Lumio · 组件层 · 规则/选择器/开关 */
+.rulebox{background:var(--rulebg);border-radius:var(--r2);padding:6px 14px;box-shadow:var(--sh2)}
+.ruleline{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:2px dashed var(--ruledash);font-size:14.5px;font-weight:600;line-height:1.55;color:var(--ruleink)}
+.ruleline:last-child{border-bottom:none}
+.ruleline .ri{font-size:17px}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{
+  width:46px;height:46px;border-radius:15px;background:#fff;border:2.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:23px;transition:all .12s;
+}
+.pick.on{border-color:var(--pink);background:var(--pink1);transform:scale(1.06)}
+.pick.c{font-size:0}
+.pick.c i{display:block;width:24px;height:24px;border-radius:50%}
+.pick.c.on i{box-shadow:0 0 0 2px #fff inset}
+/* 留言收件人：药丸形选项，爸爸/妈妈分开可选 */
+.pick.rec{width:auto;height:40px;padding:0 15px;border-radius:999px;font-size:14px;font-weight:800;color:var(--ink2);white-space:nowrap}
+.pick.rec.on{color:var(--pink3)}
+/* v2.0.46 图标字段 = 单个方框（未选＝＋，已选＝当前图标），点开才弹出选择器抽屉；
+   原先把 16 个图标内联铺在表单里，把下面的字段全挤到屏幕外。 */
+.iconbox{
+  width:54px;height:54px;border-radius:16px;background:#fff;border:2.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;line-height:1;color:var(--ink3);padding:0;
+}
+.iconbox:active{transform:scale(.94)}
+.pickgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;justify-items:center;padding:2px 0 6px}
+.sw{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:2px solid var(--line)}
+.sw:last-child{border-bottom:none}
+.sw .mid{flex:1;min-width:0}
+.sw .t{font-weight:700;font-size:14.5px}
+.sw .s{font-size:12px;color:var(--ink2)}
+/* v2.0.68 回归修复：下列 5 条在 v2.0.64「components.css → 8 个 components-*」拆分时被漏抄，
+   导致开发/编辑开关（.tog）无尺寸无样式 → 视觉消失、不可点，设置页「功能开关」与商城「上架」开关全失效。
+   现按 v2.0.63 原件逐字恢复。 */
+.tog{
+  width:50px;height:30px;border-radius:999px;background:var(--neu3);position:relative;flex:none;
+  transition:background .18s;
+}
+.tog:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 1px 4px rgba(0,0,0,.16)}
+.tog.on{background:var(--mint)}
+.tog.on:after{left:23px}

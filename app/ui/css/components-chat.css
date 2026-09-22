@@ -1,0 +1,16 @@
+/* Lumio · 组件层 · 聊天内容区（含全屏弹窗变体） */
+.chattime{text-align:center;font-size:11px;color:var(--ink3);margin:6px 0 4px;font-weight:600}
+/* 消息区按内容自适应：消息少时不留大片空白，多时封顶滚动 */
+.chatwrap{display:flex;flex-direction:column;max-height:660px;max-height:min(75vh,660px)}
+.chatscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}
+/* 相邻消息之间留呼吸感（原来两条气泡完全贴死） */
+.chatscroll .wxline + .wxline{margin-top:10px}
+.chatscroll > .chattime:first-child{margin-top:0}
+.chatinput{flex:none;display:flex;gap:8px;align-items:flex-end;padding-top:8px;border-top:1.5px dashed var(--line);margin-top:8px}
+.chatinput textarea{flex:1;height:40px;min-height:40px;max-height:110px;resize:none;padding:7px 12px;line-height:1.45;overflow-y:hidden}
+.chatinput .btn{flex:none;padding:5px 14px;font-size:14px}
+/* 聊天弹窗端型适配：手机全屏到顶（微信式对话页），PC/Pad 居中卡片（高 76vh 封顶，比例参考主流 IM 桌面端） */
+.modal.chatfull{height:100%;max-height:100%;border-radius:0;border:none}
+.modal.chatfull > h2{padding-top:14px}
+.modal.chatfull #modalBody{display:flex;flex-direction:column;overflow:hidden;padding:10px 14px calc(12px + env(safe-area-inset-bottom))}
+.modal.chatfull .chatwrap{flex:1;min-height:0;max-height:none}

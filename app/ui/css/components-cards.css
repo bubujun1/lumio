@@ -1,0 +1,42 @@
+/* Lumio · 组件层 · 卡片/列表/卡券/空态 */
+.card{background:var(--card);border:2px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:14px}
+.coupon{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFFDF6,#FFF3D8);border:2px solid #FFD98F;border-radius:16px;padding:11px 12px;margin-bottom:10px}
+.coupon .ci{position:relative;font-size:26px;width:34px;text-align:center;flex:none}
+.coupon .ci .cnt{position:absolute;right:-9px;top:-8px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--sun);color:#7A4B00;border:2px solid #fff;font-size:11px;font-weight:800;line-height:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.coupon .mid{flex:1;min-width:0}
+.coupon .mid .t{font-weight:700;font-size:14.5px;color:#7A5418;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coupon .mid .s{font-size:11.5px;color:#B08B45;margin-top:2px}
+.coupon .cut{width:0;border-left:2px dashed #FFD98F;align-self:stretch;margin:3px 0;flex:none}
+.coupon .end{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+/* 使用奖励弹窗：每张券单行（各自到期时间 + 独立使用按钮） */
+.urow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1.5px dashed var(--line)}
+.urow:last-child{border-bottom:none}
+.urow .ud{flex:1;min-width:0;font-size:13.5px;font-weight:700;color:var(--ink2)}
+.card.tight{padding:13px}
+.card-h{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.card-h h2{margin:0;font-size:16px;font-weight:800;flex:1;min-width:0}
+.card-h .ico{font-size:20px}
+.empty.emt{padding:14px 10px}
+.v.up{color:var(--gain)} .v.dn{color:var(--spend)}
+/* 列表项 */
+.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .ava{
+  width:46px;height:46px;flex:none;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;background:var(--pink1);
+}
+.item .ii{width:40px;height:40px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:var(--cream)}
+.item .mid{flex:1;min-width:0}
+.item .t{font-weight:800;font-size:15px;line-height:1.35;word-break:break-word}
+.item .s{font-size:12.5px;color:var(--ink2);margin-top:1px}
+/* v2.0.46 修缺陷：未读角标原本只有 .tab/.side .nav 两条作用域样式，孩子卡里这条没有底样式
+   → 渲染成无底裸数字（读起来像「累计赚 910 8」）。这里补上内联角标样式。 */
+.item .t .badge{
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
+  min-width:16px;height:16px;padding:0 5px;margin-left:5px;
+  background:#FF6B6B;color:#fff;border-radius:999px;font-size:11px;font-weight:800;line-height:1;
+}
+.item .end{flex:none;text-align:right}
+.del{color:#ff8a8a;font-size:12.5px;font-weight:700}
+.empty{text-align:center;color:var(--ink3);padding:30px 10px;font-size:14px}
+.empty .e{font-size:42px;display:block;margin-bottom:8px;opacity:.75}

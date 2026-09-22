@@ -1,0 +1,227 @@
+/* ============================================================
+   Lumio · base.css —— 基础层
+   职责：:root 设计变量 / 全局重置 / 通用控件(按钮·胶囊·表单·工具类) / 骨架布局
+   层叠：最先加载，后续文件可覆盖；由 index.html <link> 引入
+   ============================================================ */
+
+:root{
+  --cream:#FFF7EE; --cream2:#FFFAF3; --card:#fff;
+  --ink:#4A3B4F; --ink2:#70637C; --ink3:#B9A9BE; --gain:#2f9e73; --spend:#9b8aa3;
+  --pink:#FF97AB; --pink1:#FFE3EA; --pink2:#FFC9D6; --pink3:#C93F61; --pink4:#A82E4E;
+  --mint:#3ECB9C; --mint1:#DFF6EC; --mint2:#B4E9D3;
+  --sky:#47BDF4; --sky1:#DFF1FD; --sky2:#B8E1F8;
+  --sun:#FFBB33; --sun1:#FFF0D2; --sun2:#FFDFA0;
+  --grape:#8F79F2; --grape1:#EDE6FE;
+  --orange:#FF9E6D; --orange1:#FFEBE0;
+  --bd:#F6DFE8;
+  --line:rgba(74,59,79,.09);
+  --sh:0 4px 0 var(--bd);
+  --sh2:0 2.5px 0 var(--bd);
+  --r:24px; --r2:18px; --r3:14px;
+  /* 主题表面：默认「粉色渐变」，body.theme-blue / body.theme-sun 覆盖为蓝色/黄色渐变 */
+  --bg:linear-gradient(168deg,#FFEDF3 0%,#FFF8F1 44%,#FFECF6 100%);
+  --topbg:rgba(255,249,245,.9);
+  --stripbg:linear-gradient(120deg,#FFF3E4,#FFE9F0 60%,#EEF6FF);
+  --sect:#8a6d3b; --sectline:#F3D9A4;
+  --neu:#F2EDF4; --neu2:#E1D8E3; --neu3:#E4DCE6;
+  --rulebg:linear-gradient(140deg,#FFF9F0,#FFF3F6);
+  --ruledash:rgba(201,138,27,.18); --ruleink:#6d5a3f;
+  --ff:"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+}
+/* 蓝色渐变主题：底色转冷、品牌主色由粉转蓝、阴影转冷调 */
+body.theme-blue{
+  --cream:#EDF4FF; --cream2:#F5FAFF; --card:#fff;
+  --ink:#3B4463; --ink2:#5E6B91; --ink3:#A9B3CE; --gain:#2f9e73; --spend:#8a93ad;
+  --pink:#7B96F0; --pink1:#E3EAFF; --pink2:#C1CEFC; --pink3:#4B66D6; --pink4:#33489E;
+  --bd:#D9E2F7;
+  --line:rgba(59,68,99,.10);
+  --sh:0 4px 0 var(--bd);
+  --sh2:0 2.5px 0 var(--bd);
+  --bg:linear-gradient(168deg,#E6EFFF 0%,#F5FAFF 44%,#E9EEFF 100%);
+  --topbg:rgba(243,248,255,.9);
+  --stripbg:linear-gradient(120deg,#EDF4FF,#E7EEFF 60%,#E4F3FF);
+  --sect:#5C6B96; --sectline:#C8D5F5;
+  --neu:#EDF1FA; --neu2:#DAE1F2; --neu3:#DFE5F4;
+  --rulebg:linear-gradient(140deg,#F2F7FF,#EDF1FF);
+  --ruledash:rgba(92,107,150,.20); --ruleink:#5B6684;
+}
+/* 黄色渐变主题：暖阳底色、品牌主色由粉转琥珀金、阴影转暖调 */
+body.theme-sun{
+  --cream:#FFF7E0; --cream2:#FFFDF2; --card:#fff;
+  --ink:#5C4A1E; --ink2:#6E5E33; --ink3:#B3A479; --gain:#3a8f5f; --spend:#9a8a5e;
+  --pink:#F0A72B; --pink1:#FFF1CF; --pink2:#FBD98F; --pink3:#9A5A06; --pink4:#7A4605;
+  --bd:#F4E4C0;
+  --line:rgba(92,74,30,.10);
+  --sh:0 4px 0 var(--bd);
+  --sh2:0 2.5px 0 var(--bd);
+  --bg:linear-gradient(168deg,#FFF3CE 0%,#FFFDF2 44%,#FFEFDB 100%);
+  --topbg:rgba(255,252,240,.9);
+  --stripbg:linear-gradient(120deg,#FFF3CE,#FFEFC9 60%,#FFE9EE);
+  --sect:#96742A; --sectline:#F0DCA0;
+  --neu:#F6F0DE; --neu2:#E7DDC2; --neu3:#EBE2C8;
+  --rulebg:linear-gradient(140deg,#FFFAEB,#FFF3D9);
+  --ruledash:rgba(150,116,42,.20); --ruleink:#7A6636;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;overflow-x:hidden;max-width:100%}
+body{
+  font-family:var(--ff); color:var(--ink); background:var(--bg) fixed;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none;padding:0}
+input,select,textarea{outline:none}
+a{color:var(--pink3);text-decoration:none}
+.hidden{display:none !important}
+
+/* ---------- 通用控件 ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--pink3);color:#fff;font-weight:700;
+  border:2px solid var(--pink4);
+  border-radius:999px;padding:11px 20px;font-size:15px;
+  box-shadow:0 3px 0 var(--pink4);transition:transform .08s,box-shadow .08s;
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--pink4)}
+.btn.mint{background:var(--mint);box-shadow:0 3px 0 #35a97f;border-color:#35a97f}
+.btn.mint:active{box-shadow:0 1px 0 #35a97f}
+.btn.sky{background:var(--sky);box-shadow:0 3px 0 #3d9bd1;border-color:#3d9bd1}
+.btn.sky:active{box-shadow:0 1px 0 #3d9bd1}
+.btn.sun{background:var(--sun);box-shadow:0 3px 0 #d99b21;border-color:#d99b21}
+.btn.sun:active{box-shadow:0 1px 0 #d99b21}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 3px 0 var(--line);border:2px solid var(--line)}
+.btn.ghost:active{box-shadow:0 1px 0 var(--line)}
+.btn.gray{background:var(--neu);color:var(--ink2);box-shadow:0 3px 0 var(--neu2);border-color:var(--neu2)}
+.btn.gray:active{box-shadow:0 1px 0 #E1D8E3}
+.btn.sm{padding:7px 13px;font-size:13.5px;box-shadow:none;border-radius:999px}
+.btn.sm:active{transform:translateY(1px)}
+.btn.xs{padding:5px 11px;font-size:12.5px;box-shadow:none;border-radius:999px}
+.btn.block{width:100%}
+.btn[disabled],.btn.is-disabled{opacity:.5;pointer-events:none}
+.btn.danger{background:#FF7A7A;box-shadow:0 3px 0 #e05b5b;border-color:#e05b5b}
+.btn.danger:active{box-shadow:0 1px 0 #e05b5b}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field > label{font-size:13px;font-weight:700;color:var(--ink2);padding-left:4px}
+.inp{
+  width:100%;background:#fff;border:2px solid var(--neu2);border-radius:var(--r3);
+  padding:11px 14px;font-size:16px;transition:border-color .15s; /* 16px：低于该值手机端聚焦会自动放大页面 */
+}
+.inp:focus{border-color:var(--pink3)}
+textarea.inp{resize:vertical;min-height:74px}
+select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink2) 50%),linear-gradient(135deg,var(--ink2) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
+.row{display:flex;gap:10px;align-items:center}
+.row.wrap{flex-wrap:wrap}
+/* 按钮分组：组内不换行，组与组之间才换行——避免「一行里的按钮被拆到两行」 */
+.btngrp{display:flex;gap:8px;flex:none;flex-wrap:nowrap}
+.btngrp .btn{min-width:0}
+/* 月报「有记录天数 + 日期」稳定同排：容器不换行，日期胶囊占剩余宽度可收缩 */
+.row.statsrow{flex-wrap:nowrap}
+.row.statsrow .chip{flex:none}
+.row.statsrow .timefield{flex:1;min-width:0}
+.row.statsrow .timefield .datebox{min-width:0}
+.grow{flex:1;min-width:0}
+.muted{color:var(--ink2)}
+.tiny{font-size:12.5px}
+.center{text-align:center}
+.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.chip{
+  display:inline-flex;align-items:center;gap:5px;background:var(--pink1);color:var(--pink3);
+  border:1.5px solid currentColor;
+  border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:700;white-space:nowrap;
+}
+.chip.mint{background:var(--mint1);color:#2f8f69}
+.chip.sky{background:var(--sky1);color:#2b83b8}
+.chip.sun{background:var(--sun1);color:#b8801a}
+.chip.grape{background:var(--grape1);color:#6b52c4}
+.chip.gray{background:var(--neu);color:var(--ink2)}
+.chip.orange{background:var(--orange1);color:#c86a37}
+.chip.pink{background:#FFD9E2;color:#d04a6d}
+
+/* 到账飘字：水平居中改用 left/right+margin:auto（不依赖 transform，动画覆盖 transform 也不会歪） */
+.coinfloat{
+  position:fixed;left:0;right:0;margin:0 auto;width:fit-content;max-width:92vw;top:22%;z-index:400;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  pointer-events:none;animation:coinUp 2s cubic-bezier(.2,.7,.3,1) both;
+}
+.coinfloat .cf-e{font-size:46px;filter:drop-shadow(0 4px 10px rgba(201,138,27,.35))}
+.coinfloat .cf-t{
+  font-size:17px;font-weight:800;color:#fff;padding:7px 18px;border-radius:999px;
+  background:linear-gradient(135deg,#FFB64C,#FF8FA3);box-shadow:0 6px 18px rgba(232,138,60,.4);white-space:nowrap;
+}
+@keyframes coinUp{
+  0%{opacity:0;transform:translateY(26px) scale(.7)}
+  18%{opacity:1;transform:translateY(0) scale(1.06)}
+  30%{transform:translateY(0) scale(1)}
+  75%{opacity:1}
+  100%{opacity:0;transform:translateY(-34px) scale(.96)}
+}
+
+
+/* 积分 */
+/* v2.0.60：删除 .coin-n —— 零引用（星币只以 class="coin" 渲染）。 */
+.coin{display:inline-block;vertical-align:-3px;flex:none}
+/* v2.0.47：vertical-align 修「至多 ⊙N」里星币与文字不在一条水平线（实测偏高 2px）。
+   原因：.pricetag 是 inline-flex，其行内基线取首个 flex 项（星币 SVG，无文字基线）的底边，
+   整块被抬 2px，连带里面的数字也浮起来。此处只在 .trow .ts（12px）里行内使用，故按它调准。 */
+.pricetag{display:inline-flex;align-items:center;gap:3px;font-weight:800;color:#c98a1b;vertical-align:-2px}
+
+/* ---------- 骨架 ---------- */
+.shell{flex:1;display:flex;min-height:0;width:100%;max-width:100%}
+.side{display:none}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 96px;animation:fadein .2s ease}
+.topbar{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:var(--topbg);backdrop-filter:blur(10px);
+  border-bottom:2px solid var(--line);position:sticky;top:0;z-index:20;
+}
+.topbar h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.3px}
+.brandhero{width:38px;height:32px;flex:none}
+.topbar .brandbox{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.topbar .brandbox h1{min-width:0}
+
+/* 配色切换：粉色 / 蓝色 / 黄色渐变（在 Lumio 旁边） */
+.themesw{
+  display:flex;align-items:center;gap:13px;flex:none;
+  padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.75);
+  border:2px solid var(--line);box-shadow:var(--sh2);
+}
+.tsw{
+  width:22px;height:22px;border-radius:50%;flex:none;position:relative;
+  transition:transform .16s,box-shadow .16s;
+}
+.tsw.pink{background:linear-gradient(135deg,#FFC0CE,#FF8FA3)}
+.tsw.blue{background:linear-gradient(135deg,#9DBBFF,#5B7FE8)}
+.tsw.sun{background:linear-gradient(135deg,#FFE08A,#F5B93C)}
+.tsw.on{transform:scale(1.08);box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--pink3)}
+.tsw:active{transform:scale(.94)}
+
+.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  display:flex;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  border-top:2px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 2px;border-radius:14px;color:var(--ink3);font-size:12px;font-weight:700;
+  position:relative;transition:color .15s;
+}
+.tab .ti{font-size:19px;line-height:1;filter:grayscale(.55) opacity(.7)}
+/* v2.0.34：内联 SVG 按基线对齐会在 .ti 里多出约 0.2em 的下行空隙，
+   图标视觉偏上、文字偏下（PC/平板侧栏最明显，实测 Δ=-2.5px）→ 强制块级，由盒居中 */
+.ti svg{display:block}
+.tab.on{color:var(--pink3);background:var(--pink1);box-shadow:inset 0 0 0 2px var(--pink2);border-radius:14px}
+.tab.on .ti{filter:none}
+/* v2.0.50：计数角标统一为单一来源——底栏/侧栏 tab 与「待处理」卡头共用同一套外观，只是定位方式不同 */
+.badge{
+  background:#FF6B6B;color:#fff;border-radius:999px;min-width:17px;height:17px;padding:0 4px;
+  font-size:11px;font-weight:800;line-height:1;flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.tab .badge{position:absolute;top:3px;right:50%;transform:translateX(18px)}
+
