@@ -1,13 +1,13 @@
 /* ============================================================
    Lumio · handlers-shop.js —— 商城类动作：商品增删改上下架 / 图标选择 / 兑换 / 核销 / 提现
-   分层：L4 交互　　依赖：core / format / feedback / state / ui-kit / pages-kid / registry / actions
+   分层：L4 交互　　依赖：core / format / feedback / state / ui-kit / pages-api / registry / actions
    ============================================================ */
 import { h, val, qa } from './core.js';
 import { faceYuan, coin, fmt, expiryMs, fmtExpDate } from './format.js';
 import { toast } from './feedback.js';
 import { S } from './state.js';
 import { openIconPicker, openModal, iconField, closeModal, syncIconBox } from './ui-kit.js';
-import { couponGroup } from './pages-kid.js';
+import { couponGroup } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct, confirmDelete } from './actions.js';
 

@@ -1,13 +1,12 @@
 /* ============================================================
    Lumio · handlers.js —— 事件委托总入口：data-act 查表路由 + 表单与全局键鼠监听
-   分层：L4 交互　　依赖：core / state / render / ui-kit / pages-admin / pages-kid / registry / handlers-shell / handlers-records / handlers-account / handlers-task / handlers-shop / handlers-msg
+   分层：L4 交互　　依赖：core / state / render / ui-kit / pages-api / registry / handlers-shell / handlers-records / handlers-account / handlers-task / handlers-shop / handlers-msg
    ============================================================ */
 import { on, q } from './core.js';
 import { S } from './state.js';
 import { paint } from './render.js';
 import { closeModal } from './ui-kit.js';
-import { loadMonthStats, LumioFaceHint } from './pages-admin.js';
-import { rqPrev } from './pages-kid.js';
+import { loadMonthStats, LumioFaceHint, rqPrev } from './pages-api.js';
 import { findAct } from './registry.js';
 import './handlers-shell.js';
 import './handlers-records.js';

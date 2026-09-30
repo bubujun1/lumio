@@ -5,7 +5,7 @@
 'use strict';
 
 const { str, HttpError, clampInt, trimText, uid, nowISO } = require('../util');
-const { findKid, addLedger, cashYuanOf, DB, findShop, shopExpired, shopVisible } = require('../db');
+const { findKid, cashYuanOf, DB, findShop, shopExpired, shopVisible, adjustBalance, deleteShop } = require('../db');
 const { pushMessage, meRef } = require('../messages');
 const { approveRedemption } = require('../review');
 
@@ -21,9 +21,8 @@ const actionsShop = {
         const reason = trimText(p.reason, 60);
         if (!reason) throw new HttpError(400, delta < 0 ? '扣积分必须写明理由，让孩子知道为什么' : '请填写原因');
         if (k.balance + delta < 0) throw new HttpError(409, k.name + ' 现在只有 ' + k.balance + ' 分，扣不了那么多');
-        k.balance += delta;
         if (delta > 0) k.totalEarned += delta;
-        addLedger(k, delta, reason, 'manual', ctx);
+        adjustBalance(k, delta, reason, 'manual', ctx);
         if (trimText(p.message, 200)) pushMessage(meRef(ctx), { kind: 'kid', id: k.id, name: k.name }, p.message);
         return { kidId: k.id };
       }
@@ -77,7 +76,7 @@ const actionsShop = {
   'shop.delete': {
       role: 'admin',
       run(ctx, p) {
-        DB.shop = DB.shop.filter((s) => s.id !== str(p.id));
+        deleteShop(str(p.id));
         return {};
       }
     },
@@ -105,8 +104,6 @@ const actionsShop = {
         // 兑换免审：孩子确认后立即生效（积分即扣、奖励即得），不再等家长审核。
         // 本 handler 同步执行（run 内无 await，Node 单线程原子），扣库存与扣积分在同一临界区完成，不会并发超卖。
         approveRedemption(rdm, ctx, '');
-        const last = DB.ledger[DB.ledger.length - 1];
-        if (last) { last.operatorUid = ctx.user.uid; last.operatorName = ctx.user.username; }
         return { redemptionId: rdm.id, autoApproved: true };
       }
     },

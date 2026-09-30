@@ -6,7 +6,7 @@
 
 const { uid, trimText, str, nowISO, HttpError } = require('../util');
 const { AVATARS, KID_COLORS } = require('../constants');
-const { DB, findKid } = require('../db');
+const { DB, findKid, deleteKid, deleteParent } = require('../db');
 
 const actionsAccount = {
   'kid.create': {
@@ -100,9 +100,7 @@ const actionsAccount = {
       systemAdminOnly: true, // 解绑身份仅飞牛系统管理员可用，家长身份无此权限
       run(ctx, p) {
         const uname = trimText(p.username, 60);
-        const before = DB.parents.length;
-        DB.parents = DB.parents.filter((x) => x.username !== uname);
-        if (DB.parents.length === before) throw new HttpError(404, '没有这个家长绑定');
+        if (!deleteParent(uname)) throw new HttpError(404, '没有这个家长绑定');
         return {};
       }
     },
@@ -112,16 +110,8 @@ const actionsAccount = {
         const id = str(p.id);
         const k = findKid(id);
         if (!k) throw new HttpError(404, '找不到这个孩子');
-        DB.kids = DB.kids.filter((x) => x.id !== id);
-        DB.submissions = DB.submissions.filter((x) => x.kidId !== id);
-        DB.redemptions = DB.redemptions.filter((x) => x.kidId !== id);
-        DB.ledger = DB.ledger.filter((x) => x.kidId !== id);
-        DB.goals = DB.goals.filter((x) => x.kidId !== id);
-        DB.messages = DB.messages.filter((m) => !(m.from.kind === 'kid' && m.from.id === id) && !(m.to.kind === 'kid' && m.to.id === id));
-        DB.accepts = DB.accepts.filter((a) => a.kidId !== id);
-        // 提现记录也要清：否则孩子删了，这笔提现仍挂在家长「待处理」里、还能被核销
-        // （前端 kidOf() 找不到人会显示成「小朋友」，成为无从追溯的无主记录）
-        DB.withdrawals = DB.withdrawals.filter((w) => w.kidId !== id);
+        // 级联清理收口在 db.deleteKid：删孩子必须连带清 8 张关联表，否则留下无主脏数据
+        deleteKid(id);
         return {};
       }
     }

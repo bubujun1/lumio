@@ -6,7 +6,10 @@
 const fs = require('fs');
 const { DATA_DIR, DB_FILE } = require('./config');
 const { uid, nowISO, log, str, trimText, clampInt, dayEndISO, localDay } = require('./util');
-const { defaultDB, normalizeDB, cashYuanOf, checkSchemaDrift } = require('./normalize');
+const { defaultDB, normalizeDB, checkSchemaDrift } = require('./normalize');
+/* 商城域谓词（可见性 / 过期 / 截止时间戳 / 现金面额）下沉到 shop-domain.js（L1），
+   db.js 仅做数据层，不再夹带领域判断；这里重新导出以保持对旧调用方的兼容。 */
+const { cashYuanOf, shopExpired, shopVisible, redeemDeadlineMs } = require('./shop-domain');
 /* 数据容器：identity 必须稳定 —— 其他模块 require 进来的是同一个对象引用，
    因此禁止整体重赋值（CommonJS 没有 ESM 那样的实时绑定），只做原地更新。 */
 const DB = {};
@@ -63,6 +66,9 @@ function saveSoon() {
   saveDB();
 }
 /* ------------------------------------------------------------------ 业务 */
+/* 账本滚动上限：kid.balance 才是积分的真相源，ledger 仅保留近期流水用于展示与追溯；
+   超过上限时从头部丢弃最旧记录，不影响当前余额或任何统计（W1 收敛：静默裁剪改为显式常量 + 语义说明）。 */
+const LEDGER_CAP = 5000;
 function addLedger(kid, delta, reason, kind, ctx, balanceAfter) {
   const entry = {
     id: uid('lg'), kidId: kid.id, delta, balanceAfter: balanceAfter === undefined ? kid.balance : balanceAfter,
@@ -72,41 +78,75 @@ function addLedger(kid, delta, reason, kind, ctx, balanceAfter) {
     at: nowISO()
   };
   DB.ledger.push(entry);
-  if (DB.ledger.length > 5000) DB.ledger.splice(0, DB.ledger.length - 5000);
+  if (DB.ledger.length > LEDGER_CAP) DB.ledger.splice(0, DB.ledger.length - LEDGER_CAP);
   return entry;
+}
+/** 原子调整积分余额并写账本：先改余额，再以最新余额作为 balanceAfter 落账本，
+ *  杜绝「改了余额忘了写账本」或「账本余额与真实余额漂移」的回归（v1.0.0 coin.adjust 账实不符同类问题）。
+ *  注意：totalEarned 等累计指标由调用方按业务语义自行处理（仅 earn 路径累加），本函数只负责「余额+账本」这对不变量。 */
+function adjustBalance(kid, delta, reason, kind, ctx) {
+  kid.balance += delta;
+  return addLedger(kid, delta, reason, kind, ctx);
 }
 function findKid(id) { return DB.kids.find((k) => k.id === id) || null; }
 function findTask(id) { return DB.tasks.find((t) => t.id === id) || null; }
 function findShop(id) { return DB.shop.find((s) => s.id === id) || null; }
+/* -------------------------------------------------------- 数据访问助手（DAL）
+   把所有对 DB.<col> 的就地增删改集中收口，避免散落在各 action 里的 filter 赋值漂移、
+   以及跨表级联删除（删孩子要清 8 张关联表）遗漏某一处导致无主脏数据。 */
+/** 删除孩子并级联清理其全部关联记录（与 v1.0.0 修复的孤儿 accepts 同思路：删除必须连带清理） */
+function deleteKid(id) {
+  DB.kids = DB.kids.filter((x) => x.id !== id);
+  DB.submissions = DB.submissions.filter((x) => x.kidId !== id);
+  DB.redemptions = DB.redemptions.filter((x) => x.kidId !== id);
+  DB.ledger = DB.ledger.filter((x) => x.kidId !== id);
+  DB.goals = DB.goals.filter((x) => x.kidId !== id);
+  DB.messages = DB.messages.filter((m) => !((m.from && m.from.kind === 'kid' && m.from.id === id)) && !((m.to && m.to.kind === 'kid' && m.to.id === id)));
+  DB.accepts = DB.accepts.filter((a) => a.kidId !== id);
+  DB.withdrawals = DB.withdrawals.filter((w) => w.kidId !== id);
+}
+/** 按用户名解绑家长，返回是否真的删除了（未找到返回 false，便于 action 抛 404） */
+function deleteParent(username) {
+  const before = DB.parents.length;
+  DB.parents = DB.parents.filter((x) => x.username !== username);
+  return DB.parents.length !== before;
+}
+function deleteShop(id) { DB.shop = DB.shop.filter((s) => s.id !== str(id)); }
+/** 删除任务：连带清 accepts；保留已通过审核的提交记录（家长仍可追溯），未通过的提交一并清除 */
+function deleteTask(id) {
+  DB.tasks = DB.tasks.filter((t) => t.id !== id);
+  DB.submissions = DB.submissions.filter((s) => s.taskId !== id || s.status === 'approved');
+  DB.accepts = DB.accepts.filter((a) => a.taskId !== id);
+}
+function deleteGoal(id) { DB.goals = DB.goals.filter((x) => x.id !== str(id)); }
+/** 清空所有动态与积分记录，保留家庭成员 / 孩子 / 任务 / 商城 / 设置，并清零孩子余额 */
+function clearRecords() {
+  DB.submissions = [];
+  DB.redemptions = [];
+  DB.ledger = [];
+  DB.messages = [];
+  DB.goals = [];
+  DB.accepts = [];
+  DB.withdrawals = [];
+  DB.kids.forEach((k) => { k.balance = 0; k.totalEarned = 0; k.cash = 0; });
+}
+/** 恢复出厂设置（整库替换为默认结构） */
+function resetDB() {
+  const fresh = defaultDB();
+  Object.keys(fresh).forEach((key) => { DB[key] = fresh[key]; });
+  return fresh;
+}
+/** 数据统计：供 /debug 诊断页只读展示（避免 http 层直接戳 DB） */
+function dbStats() {
+  return { kids: DB.kids.length, ledger: DB.ledger.length, seenUsers: DB.seenUsers.length };
+}
+/** 导出整库 JSON 字符串：供 /api/backup 下载（避免 http 层直接序列化 DB） */
+function dumpDB() {
+  return JSON.stringify(DB, null, 1);
+}
 /** 积分 → 现金（元），按 coinsPerYuan 换算，保留 1 位小数 */
 function cashYuan(coins) {
   return Math.round((Math.max(0, coins) / Math.max(1, DB.settings.coinsPerYuan)) * 10) / 10;
-}
-/** 奖励是否对孩子可见：已上架 + 未过期 + 有库存 */
-function shopVisible(s) {
-  if (!s) return false;
-  if (s.active === false) return false;
-  const listed = (s.listed === undefined) ? true : !!s.listed; // 兼容 v2.0.5 旧数据/种子：无 listed 视为已上架
-  if (!listed) return false;
-  if (s.stock === 0) return false;
-  if (shopExpired(s)) return false;
-  return true;
-}
-/** 兑换截止时间戳：纯日期（YYYY-MM-DD，来自 <input type="date">）按「当天本地 23:59:59」算，
- *  避免 JS 把纯日期按 UTC 解析，导致北京时间提前 8 小时下架；带时间的 ISO 串按原值精确解析。 */
-function redeemDeadlineMs(v) {
-  const s = str(v);
-  if (!s) return NaN;
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999).getTime();
-  const t = Date.parse(s);
-  return isFinite(t) ? t : NaN;
-}
-/** 奖励兑换时限是否已过期（截止日当天全天有效，次日 0 点后才算过期） */
-function shopExpired(s) {
-  if (!s) return false;
-  const t = redeemDeadlineMs(s.redeemDeadline);
-  return isFinite(t) && t <= Date.now();
 }
 // 动作 / 重要变更：短窗去抖落盘（P1-#2）——替代"每动作同步整库写"，避免阻塞事件循环。
 // 内存态始终是真相源，去抖只影响"落盘时延"（崩溃最多丢 ~1s），不影响读取一致性。
@@ -128,17 +168,27 @@ module.exports = {
   redeemDeadlineMs,
   findKid,
   addLedger,
+  adjustBalance,
   saveSoon,
   slotOfTitle,
   findShop,
+  findTask,
   cashYuan,
   shopVisible,
-  findTask,
   cashYuanOf,
   defaultDB,
   saveDB,
   loadDB,
   normalizeDB,
   scheduleSave,
-  flushSave
+  flushSave,
+  deleteKid,
+  deleteParent,
+  deleteShop,
+  deleteTask,
+  deleteGoal,
+  clearRecords,
+  resetDB,
+  dbStats,
+  dumpDB
 };

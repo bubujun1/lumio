@@ -1,6 +1,6 @@
 /* ============================================================
    Lumio · handlers-msg.js —— 消息类动作：留言与悄悄话 / 收发消息 / 消息子页切换
-   分层：L4 交互　　依赖：core / format / api / feedback / state / domain / render / ui-kit / pages-kid / registry / actions / boot
+   分层：L4 交互　　依赖：core / format / api / feedback / state / domain / render / ui-kit / pages-api / registry / actions / boot
    ============================================================ */
 import { q, running, done, h, val, qa } from './core.js';
 import { byAtAsc } from './format.js';
@@ -10,7 +10,7 @@ import { S } from './state.js';
 import { isReadBy } from './domain.js';
 import { paint } from './render.js';
 import { openModal, chatStick, maskOf, refreshTopModal } from './ui-kit.js';
-import { chatHtml, isMine, meRefKid, kidBucketOf } from './pages-kid.js';
+import { chatHtml, isMine, meRefKid, kidBucketOf } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct } from './actions.js';
 import { refresh } from './boot.js';

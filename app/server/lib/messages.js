@@ -7,6 +7,9 @@
 const { str, HttpError, trimText, uid, nowISO } = require('./util');
 const { SLOT_LABEL } = require('./constants');
 const { DB, slotOfTitle, findKid } = require('./db');
+/* pushMessage / memberKey 的统一实现收口在 notify.js（L1），messages.js 仅 re-export，
+   不再各自维护一份；这样 schedule.js 可直接 require notify，避免 L1→L2 逆层。 */
+const { pushMessage, memberKey } = require('./notify');
 
 /* ------------------------------------------- 家庭成员引用 · 消息可见性规则 */
 
@@ -42,8 +45,6 @@ function meRef(ctx) {
   }
   return null;
 }
-
-function memberKey(ref) { return ref ? ref.kind + ':' + (ref.id || '*') : ''; }
 
 /** 只有发送人和收件人能看到：
  *  - to.kind==='parents'  → 所有家长都能看到（群聊）
@@ -133,21 +134,6 @@ function resolveRecipient(ctx, to) {
     throw new HttpError(400, '请选择要发给谁');
   }
   throw new HttpError(403, '当前身份不能发消息');
-}
-
-/** 写一条定向消息（发送人自动标记已读） */
-function pushMessage(from, to, text) {
-  const body = trimText(text, 200);
-  if (!body || !from || !to) return null;
-  const m = {
-    id: uid('msg'),
-    from: { kind: from.kind, id: str(from.id), slot: str(from.slot), name: trimText(from.name, 60) },
-    to: { kind: to.kind, id: str(to.id), slot: str(to.slot), name: trimText(to.name, 60) },
-    text: body, at: nowISO(), readBy: [memberKey(from)], sys: false
-  };
-  DB.messages.push(m);
-  if (DB.messages.length > 2000) DB.messages.splice(0, DB.messages.length - 2000);
-  return m;
 }
 
 /** 家长对外称呼：绑定了家长身份的用称呼（妈妈/爸爸），否则用全局称呼 */

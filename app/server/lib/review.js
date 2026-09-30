@@ -5,7 +5,7 @@
 'use strict';
 
 const { HttpError, clampInt, nowISO, trimText, localDay } = require('./util');
-const { findKid, addLedger, findShop, cashYuan } = require('./db');
+const { findKid, addLedger, findShop, cashYuan, adjustBalance } = require('./db');
 
 /** 审核：通过孩子提交的任务完成申请（granted 可选：家长酌情调整实发积分，只能 0~原定值） */
 function approveSubmission(sub, ctx, reply, granted) {
@@ -17,7 +17,6 @@ function approveSubmission(sub, ctx, reply, granted) {
   if (granted !== undefined && granted !== null && granted !== '') {
     coins = clampInt(granted, 0, planned, planned);
   }
-  kid.balance += coins;
   kid.totalEarned += coins;
   sub.status = 'approved';
   sub.reviewedAt = nowISO();
@@ -25,7 +24,7 @@ function approveSubmission(sub, ctx, reply, granted) {
   if (reply) sub.reply = trimText(reply, 120);
   let reason = '完成任务：' + (sub.taskTitle || '任务');
   if (coins < planned) reason += '（原定 ' + planned + ' 分，家长调整为 ' + coins + ' 分）';
-  addLedger(kid, coins, reason, 'task', ctx);
+  adjustBalance(kid, coins, reason, 'task', ctx);
   return { kid, coins, planned };
 }
 
@@ -40,7 +39,6 @@ function approveRedemption(rdm, ctx, reply) {
   }
   const cost = Math.max(0, Math.round(Number(rdm.cost) || 0));
   if (kid.balance < cost) throw new HttpError(409, kid.name + ' 的积分不够啦（差 ' + (cost - kid.balance) + ' 个）');
-  kid.balance -= cost;
   rdm.status = 'approved';
   rdm.reviewedAt = nowISO();
   if (reply) rdm.reply = trimText(reply, 120);
@@ -62,12 +60,12 @@ function approveRedemption(rdm, ctx, reply) {
     kid.cash = Math.round(((kid.cash || 0) + gainYuan) * 10) / 10;
     rdm.useStatus = '';
     rdm.usedAt = '';
-    addLedger(kid, -cost, '兑换：现金 ' + gainYuan + ' 元', 'redeem', ctx);
+    adjustBalance(kid, -cost, '兑换：现金 ' + gainYuan + ' 元', 'redeem', ctx);
   } else {
     // 实物/权益奖励：成为孩子的资产，待孩子使用
     rdm.useStatus = 'unused';
     rdm.usedAt = '';
-    addLedger(kid, -cost, '兑换：' + (rdm.itemName || '奖励'), 'redeem', ctx);
+    adjustBalance(kid, -cost, '兑换：' + (rdm.itemName || '奖励'), 'redeem', ctx);
   }
   return { kid, cost, isCash };
 }

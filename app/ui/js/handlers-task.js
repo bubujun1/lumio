@@ -1,13 +1,13 @@
 /* ============================================================
    Lumio · handlers-task.js —— 任务类动作：目标 / 任务增删改上下架 / 审核 / 发放积分 / 提交与确认
-   分层：L4 交互　　依赖：core / format / feedback / state / ui-kit / pages-kid / registry / actions
+   分层：L4 交互　　依赖：core / format / feedback / state / ui-kit / pages-api / registry / actions
    ============================================================ */
 import { val, qa, q, h } from './core.js';
 import { fmt, defaultDeadline, deadlineTimeOpts, deadlinePreset, coin } from './format.js';
 import { toast } from './feedback.js';
 import { S } from './state.js';
 import { openModal, iconField, closeModal, syncIconBox } from './ui-kit.js';
-import { taskDeadlineHtml } from './pages-kid.js';
+import { taskDeadlineHtml } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct, confirmDelete } from './actions.js';
 

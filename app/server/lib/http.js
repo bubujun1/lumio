@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { BASE_PATH, MAX_BODY, UI_DIR, VAR_DIR, SOCKET_PATH, PORT, DATA_DIR, APPNAME } = require('./config');
 const { HttpError, str, nowISO, localDay, log } = require('./util');
-const { DB, saveDB, scheduleSave } = require('./db');
+const { saveDB, scheduleSave, dbStats, dumpDB } = require('./db');
 const { purgeExpiredTasks } = require('./schedule');
 const { resolveCtx } = require('./auth');
 const { buildState } = require('./state');
@@ -84,7 +84,7 @@ function serveStatic(res, relPath) {
   let clean = relPath.replace(/\\/g, '/');
   if (clean === '/' || clean === '') clean = '/index.html';
   const filePath = path.resolve(path.join(UI_DIR, clean));
-  if (!filePath.startsWith(path.resolve(UI_DIR))) { sendJson(res, 403, { ok: false, error: '禁止访问' }); return; }
+  if (!filePath.startsWith(path.resolve(UI_DIR) + path.sep)) { sendJson(res, 403, { ok: false, error: '禁止访问' }); return; }
   fs.readFile(filePath, (err, data) => {
     if (err) { sendJson(res, 404, { ok: false, error: '找不到页面' }); return; }
     const ext = path.extname(filePath).toLowerCase();
@@ -100,6 +100,7 @@ function serveStatic(res, relPath) {
 
 function debugPage(ctx) {
   const esc = (s) => str(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const stats = dbStats();
   let logTail = '';
   try {
     const f = path.join(VAR_DIR, 'app.log');
@@ -122,7 +123,7 @@ td{border-bottom:1px solid #FFE0E8;padding:8px 12px;font-size:14px}td:first-chil
 <tr><td>监听方式</td><td>${esc(SOCKET_PATH ? 'Unix Socket ' + SOCKET_PATH : 'TCP :' + PORT)}</td></tr>
 <tr><td>数据目录</td><td>${esc(DATA_DIR)}</td></tr>
 <tr><td>运行目录</td><td>${esc(VAR_DIR)}</td></tr>
-<tr><td>数据统计</td><td>孩子 ${DB.kids.length} 人 / 流水 ${DB.ledger.length} 条 / 见过 ${DB.seenUsers.length} 位飞牛用户</td></tr>
+<tr><td>数据统计</td><td>孩子 ${stats.kids} 人 / 流水 ${stats.ledger} 条 / 见过 ${stats.seenUsers} 位飞牛用户</td></tr>
 </table>
 <h1>最近日志</h1><pre>${esc(logTail || '(暂无)')}</pre>
 <p><a href="${BASE_PATH || '/'}">← 返回Lumio</a></p></body></html>`;
@@ -186,7 +187,7 @@ const server = http.createServer(async (req, res) => {
           'Content-Disposition': 'attachment; filename="lumio-backup-' + stamp + '.json"',
           'Cache-Control': 'no-store'
         });
-        res.end(JSON.stringify(DB, null, 1));
+        res.end(dumpDB());
         return;
       }
 

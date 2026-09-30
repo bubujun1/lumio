@@ -29,6 +29,9 @@ function gatewayUser(req) {
   return { uid: u, username: name, isAdmin };
 }
 
+/* 访客留痕滚动上限：seenUsers 仅用于家长端展示"谁来过"，是最近访问快照而非审计数据；
+   超过上限从头部丢弃最旧访客，不影响任何业务或权限判断（W1 收敛：静默裁剪改为显式常量）。 */
+const SEEN_USERS_CAP = 60;
 function touchSeenUser(user) {
   const list = DB.seenUsers;
   const hit = list.find((x) => x.uid === user.uid);
@@ -37,14 +40,14 @@ function touchSeenUser(user) {
     hit.isAdmin = user.isAdmin;
     hit.lastSeen = nowISO();
     hit.visits = (hit.visits || 0) + 1;
-    if (list.length > 60) list.splice(0, list.length - 60);
+    if (list.length > SEEN_USERS_CAP) list.splice(0, list.length - SEEN_USERS_CAP);
     return false; // 已知访客：仅更新内存，不触发写盘
   }
   list.push({
     uid: user.uid, username: user.username, isAdmin: user.isAdmin,
     firstSeen: nowISO(), lastSeen: nowISO(), visits: 1
   });
-  if (list.length > 60) list.splice(0, list.length - 60);
+  if (list.length > SEEN_USERS_CAP) list.splice(0, list.length - SEEN_USERS_CAP);
   return true; // 新访客：需落盘
 }
 

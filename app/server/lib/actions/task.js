@@ -6,8 +6,8 @@
 
 const { trimText, HttpError, uid, str, clampInt, dayEndISO, localDay, nowISO, fmtDeadlineText } = require('../util');
 const { TASK_TYPES } = require('../constants');
-const { DB, findTask, findKid } = require('../db');
-const { isExpired, acceptRequired, periodKeyOf, periodLabel } = require('../schedule');
+const { DB, findTask, findKid, deleteTask, deleteGoal } = require('../db');
+const { isExpired, acceptRequired, periodKeyOf, periodLabel } = require('../schedule-core');
 const { pushMessage, meRef } = require('../messages');
 const { approveSubmission } = require('../review');
 
@@ -87,10 +87,7 @@ const actionsTask = {
   'task.delete': {
       role: 'admin',
       run(ctx, p) {
-        const id = str(p.id);
-        DB.tasks = DB.tasks.filter((t) => t.id !== id);
-        DB.submissions = DB.submissions.filter((s) => s.taskId !== id || s.status === 'approved');
-        DB.accepts = DB.accepts.filter((a) => a.taskId !== id);
+        deleteTask(str(p.id));
         return {};
       }
     },
@@ -125,9 +122,6 @@ const actionsTask = {
         let auto = false;
         if (!DB.settings.taskNeedsApproval) {
           approveSubmission(sub, ctx, '');
-          // 不需要审核时，操作人记为孩子自己
-          const last = DB.ledger[DB.ledger.length - 1];
-          if (last) { last.operatorUid = ctx.user.uid; last.operatorName = ctx.user.username; }
           auto = true;
         }
         // 站内信：任务完成情况告知父母
@@ -163,7 +157,7 @@ const actionsTask = {
       run(ctx, p) {
         const g = DB.goals.find((x) => x.id === str(p.id) && x.kidId === ctx.kid.id);
         if (!g) throw new HttpError(404, '找不到这个心愿');
-        DB.goals = DB.goals.filter((x) => x.id !== g.id);
+        deleteGoal(g.id);
         return {};
       }
     },

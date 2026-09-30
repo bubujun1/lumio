@@ -128,6 +128,8 @@ function normalizeDB(d) {
     boundUsername: trimText(k.boundUsername, 60),
     balance: clampInt(k.balance, 0, 100000000, 0),
     cash: Math.round(Number(k.cash) * 10) / 10 >= 0 ? Math.round(Number(k.cash) * 10) / 10 : 0,
+    // 累计总收入：单调递增的生命周期统计（仅 earn 路径 +delta，绝不回退），与余额（balance）无关；
+    // 仅 clearRecords 整库清零时归零。供家长端展示"孩子一共赚了多少"，不参与任何余额计算。
     totalEarned: clampInt(k.totalEarned, 0, 100000000, 0),
     note: trimText(k.note, 120),
     createdAt: str(k.createdAt) || nowISO()

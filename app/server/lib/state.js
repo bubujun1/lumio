@@ -7,7 +7,7 @@
 const { localDay } = require('./util');
 const { levelOf } = require('./level');
 const { DB, shopVisible } = require('./db');
-const { isExpired, periodKeyOf, acceptRequired, taskGroup, periodLabel } = require('./schedule');
+const { isExpired, periodKeyOf, acceptRequired, taskGroup, periodLabel } = require('./schedule-core');
 const { meRef, memberKey, msgVisible, messagesFor, unreadCountFor, kidRecipients } = require('./messages');
 const { weekStartDay, streakDays, badgesOf } = require('./stats');
 const { AVATARS, KID_COLORS } = require('./constants');

@@ -1,6 +1,6 @@
 /* ============================================================
    Lumio · handlers-shell.js —— 骨架类动作：重载 / 切页 / 主题 / 设置 / 备份 / 通用弹窗
-   分层：L4 交互　　依赖：core / theme / api / feedback / state / render / ui-kit / pages-admin / pages-kid / registry / actions / boot
+   分层：L4 交互　　依赖：core / theme / api / feedback / state / render / ui-kit / pages-api / registry / actions / boot
    ============================================================ */
 import { q, APP_BASE, running, done } from './core.js';
 import { applyTheme } from './theme.js';
@@ -9,8 +9,7 @@ import { toast } from './feedback.js';
 import { S } from './state.js';
 import { paint, isAdmin } from './render.js';
 import { maskOf, closeModalOf, openModal, closeModal } from './ui-kit.js';
-import { loadMonthStats, openSettingsModal } from './pages-admin.js';
-import { rulesInnerHtml, heroInnerHtml } from './pages-kid.js';
+import { loadMonthStats, openSettingsModal, rulesInnerHtml, heroInnerHtml } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct } from './actions.js';
 import { boot } from './boot.js';

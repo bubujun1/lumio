@@ -5,7 +5,7 @@
 'use strict';
 
 const { HttpError, log, str, localDay, clampInt, trimText } = require('../util');
-const { DB, defaultDB } = require('../db');
+const { DB, clearRecords, resetDB } = require('../db');
 
 const actionsAdmin = {
   'data.clear': {
@@ -15,19 +15,11 @@ const actionsAdmin = {
         if (!ctx.user.isAdmin) throw new HttpError(403, '只有系统管理员可以清空数据');
         const scope = p.scope === 'all' ? 'all' : 'records';
         if (scope === 'records') {
-          // 清空积分记录与动态，保留家庭成员/孩子/任务/商城/设置
-          DB.submissions = [];
-          DB.redemptions = [];
-          DB.ledger = [];
-          DB.messages = [];
-          DB.goals = [];
-          DB.accepts = [];
-          DB.withdrawals = []; // 现金提取（待核销）记录一并清空
-          DB.kids.forEach((k) => { k.balance = 0; k.totalEarned = 0; k.cash = 0; });
+          // 清空积分记录与动态，保留家庭成员/孩子/任务/商城/设置（收口在 db.clearRecords）
+          clearRecords();
           return { scope: 'records' };
         }
-        const fresh = defaultDB();
-        Object.keys(fresh).forEach((key) => { DB[key] = fresh[key]; });
+        resetDB(); // 恢复出厂设置：整库替换为默认结构（收口在 db.resetDB）
         log('[db] 已恢复出厂设置（by ' + ctx.user.username + '）');
         return { scope: 'all' };
       }
