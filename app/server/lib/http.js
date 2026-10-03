@@ -194,11 +194,21 @@ const server = http.createServer(async (req, res) => {
       if (urlPath === '/api/update/check' && req.method === 'GET') {
         if (!ctx.user || !ctx.user.isAdmin) { sendJson(res, 403, { ok: false, error: '只有系统管理员可以检查更新' }); return; }
         const APP_VERSION = (function () {
-          try {
-            const mt = fs.readFileSync(path.join(APP_DIR, '..', 'manifest'), 'utf8');
-            const m = mt.match(/^\s*version\s*=\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
-            if (m) return m[1];
-          } catch (e) {}
+          // fnOS 部署时 APP_DIR=安装根目录（manifest 就在根下：${APP_DIR}/manifest）；
+          // 从源码/dev 跑时 APP_DIR=app/ 子目录（manifest 在上级：${APP_DIR}/../manifest）。
+          // 两处都尝试，避免“恒定 0.0.0”误报。
+          const cand = [
+            path.join(APP_DIR, 'manifest'),
+            path.join(APP_DIR, '..', 'manifest'),
+            path.join(__dirname, '..', '..', '..', 'manifest')
+          ];
+          for (const p of cand) {
+            try {
+              const mt = fs.readFileSync(p, 'utf8');
+              const m = mt.match(/^\s*version\s*=\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
+              if (m) return m[1];
+            } catch (e) {}
+          }
           return '0.0.0';
         })();
         function cmpVer(a, b) {

@@ -13,4 +13,4 @@ os_min_version        = 1.2.0
 desktop_uidir         = ui
 desktop_applaunchname = lumio.Application
 micro_app             = true
-checksum              = 93c264b6a09c1df2b742d42d918ba82e
+checksum              = dc13664f6489e1908fad8b4d78b87e18
