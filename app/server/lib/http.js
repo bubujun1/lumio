@@ -7,7 +7,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { BASE_PATH, MAX_BODY, UI_DIR, VAR_DIR, SOCKET_PATH, PORT, DATA_DIR, APPNAME, APP_DIR } = require('./config');
+const { BASE_PATH, MAX_BODY, UI_DIR, VAR_DIR, SOCKET_PATH, PORT, DATA_DIR, APPNAME, APP_DIR, resolveAppVersion } = require('./config');
 const { HttpError, str, nowISO, localDay, log } = require('./util');
 const { saveDB, scheduleSave, dbStats, dumpDB } = require('./db');
 const { purgeExpiredTasks } = require('./schedule');
@@ -193,24 +193,8 @@ const server = http.createServer(async (req, res) => {
       /* v1.0.1：检查更新——后端代理 GitHub Releases，仅系统管理员可触发 */
       if (urlPath === '/api/update/check' && req.method === 'GET') {
         if (!ctx.user || !ctx.user.isAdmin) { sendJson(res, 403, { ok: false, error: '只有系统管理员可以检查更新' }); return; }
-        const APP_VERSION = (function () {
-          // fnOS 部署时 APP_DIR=安装根目录（manifest 就在根下：${APP_DIR}/manifest）；
-          // 从源码/dev 跑时 APP_DIR=app/ 子目录（manifest 在上级：${APP_DIR}/../manifest）。
-          // 两处都尝试，避免“恒定 0.0.0”误报。
-          const cand = [
-            path.join(APP_DIR, 'manifest'),
-            path.join(APP_DIR, '..', 'manifest'),
-            path.join(__dirname, '..', '..', '..', 'manifest')
-          ];
-          for (const p of cand) {
-            try {
-              const mt = fs.readFileSync(p, 'utf8');
-              const m = mt.match(/^\s*version\s*=\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
-              if (m) return m[1];
-            } catch (e) {}
-          }
-          return '0.0.0';
-        })();
+        const VER = resolveAppVersion();
+        const APP_VERSION = VER.version;
         function cmpVer(a, b) {
           var pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
           for (var i = 0; i < 3; i++) { var x = pa[i] || 0, y = pb[i] || 0; if (x > y) return 1; if (x < y) return -1; }
@@ -230,6 +214,8 @@ const server = http.createServer(async (req, res) => {
           sendJson(res, 200, {
             ok: true,
             current: APP_VERSION,
+            versionSource: VER.source,
+            versionFallback: VER.fallback,
             latest: latest,
             updateAvailable: updateAvailable,
             url: gj.html_url || ('https://github.com/bubujun1/lumio/releases/tag/' + (gj.tag_name || '')),

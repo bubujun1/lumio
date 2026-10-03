@@ -7,7 +7,7 @@
 
 const http = require('http');
 const fs = require('fs');
-const { SOCKET_PATH, BASE_PATH, PORT, DEV_IDENTITY } = require('./lib/config');
+const { SOCKET_PATH, BASE_PATH, PORT, DEV_IDENTITY, resolveAppVersion } = require('./lib/config');
 const { log } = require('./lib/util');
 const { loadDB, flushSave } = require('./lib/db');
 const { server } = require('./lib/http');
@@ -33,6 +33,13 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 loadDB();
+
+// 版本自检：启动即打印来源；未找到 manifest 时明确告警，避免再次静默回退 0.0.0
+try {
+  const v = resolveAppVersion();
+  log('[version] ' + v.version + (v.fallback ? '  来源=内置常量（未找到 manifest，请检查安装布局）' : ('  来源=' + v.source)));
+} catch (e) { /* ignore */ }
+
 
 if (SOCKET_PATH) {
   try { fs.unlinkSync(SOCKET_PATH); } catch (e) { /* ignore */ }
