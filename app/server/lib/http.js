@@ -7,7 +7,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { BASE_PATH, MAX_BODY, UI_DIR, VAR_DIR, SOCKET_PATH, PORT, DATA_DIR, APPNAME } = require('./config');
+const { BASE_PATH, MAX_BODY, UI_DIR, VAR_DIR, SOCKET_PATH, PORT, DATA_DIR, APPNAME, APP_DIR } = require('./config');
 const { HttpError, str, nowISO, localDay, log } = require('./util');
 const { saveDB, scheduleSave, dbStats, dumpDB } = require('./db');
 const { purgeExpiredTasks } = require('./schedule');
@@ -189,6 +189,47 @@ const server = http.createServer(async (req, res) => {
         });
         res.end(dumpDB());
         return;
+      }
+      /* v1.0.1：检查更新——后端代理 GitHub Releases，仅系统管理员可触发 */
+      if (urlPath === '/api/update/check' && req.method === 'GET') {
+        if (!ctx.user || !ctx.user.isAdmin) { sendJson(res, 403, { ok: false, error: '只有系统管理员可以检查更新' }); return; }
+        const APP_VERSION = (function () {
+          try {
+            const mt = fs.readFileSync(path.join(APP_DIR, '..', 'manifest'), 'utf8');
+            const m = mt.match(/^\s*version\s*=\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
+            if (m) return m[1];
+          } catch (e) {}
+          return '0.0.0';
+        })();
+        function cmpVer(a, b) {
+          var pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
+          for (var i = 0; i < 3; i++) { var x = pa[i] || 0, y = pb[i] || 0; if (x > y) return 1; if (x < y) return -1; }
+          return 0;
+        }
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(function () { ctrl.abort(); }, 6000);
+          const greq = await fetch('https://api.github.com/repos/bubujun1/lumio/releases/latest', {
+            headers: { 'User-Agent': 'Lumio', 'Accept': 'application/vnd.github+json' }
+          });
+          clearTimeout(tid);
+          if (!greq.ok) { sendJson(res, 200, { ok: false, error: '更新服务器返回 ' + greq.status, current: APP_VERSION }); return; }
+          const gj = await greq.json();
+          const latest = String(gj.tag_name || '').replace(/^v/i, '');
+          const updateAvailable = cmpVer(latest, APP_VERSION) > 0;
+          sendJson(res, 200, {
+            ok: true,
+            current: APP_VERSION,
+            latest: latest,
+            updateAvailable: updateAvailable,
+            url: gj.html_url || ('https://github.com/bubujun1/lumio/releases/tag/' + (gj.tag_name || '')),
+            published_at: gj.published_at || ''
+          });
+          return;
+        } catch (e) {
+          sendJson(res, 200, { ok: false, error: '无法连接更新服务器（设备可能未联网）', current: APP_VERSION });
+          return;
+        }
       }
 
       if (urlPath === '/api/action' && req.method === 'POST') {

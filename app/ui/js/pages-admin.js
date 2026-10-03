@@ -347,6 +347,7 @@ function adminManageHtml() {
       cardHead('🧰', '数据与维护') +
       '<div class="tiny muted" style="margin-bottom:10px">仅系统管理员可见。清空操作不可恢复，建议先备份。</div>' +
       '<div class="row wrap" style="gap:8px">' +
+      '<button class="btn sm mint" data-act="check-update">🔄 检查更新</button>' +
       '<button class="btn sm sky" data-act="backup">📦 备份数据</button>' +
       '<button class="btn sm sun" data-act="data-clear">🧹 清空记录</button>' +
       '<button class="btn sm gray" data-act="data-reset">⚠️ 恢复出厂</button>' +

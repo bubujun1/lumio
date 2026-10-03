@@ -102,3 +102,35 @@ function actDataReset(e, el, act, id) {
     return;
   }
 regAct("data-reset", actDataReset);
+
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function urlOf(u) {
+  try { var p = new URL(u); if (p.protocol === 'https:' && /github\.com$/i.test(p.hostname)) return u; } catch (e) {}
+  return 'https://github.com/bubujun1/lumio/releases';
+}
+function actCheckUpdate(e, el, act, id) {
+  openModal({ title: '检查更新', body: '<div class="tiny" id="cuBody">正在连接更新服务器，请稍候…</div>', okOnly: true, okText: '关闭' });
+  var body = document.getElementById('cuBody');
+  fetch(APP_BASE + '/api/update/check').then(function (r) { return r.json(); }).then(function (res) {
+    if (!body) body = document.getElementById('cuBody');
+    if (!res || !res.ok) {
+      body.innerHTML = '<div class="err">检查更新失败：' + esc(res && res.error ? res.error : '未知错误') + '</div>' + (res && res.current ? '<div class="tiny" style="margin-top:8px">当前版本：' + esc(res.current) + '</div>' : '');
+      return;
+    }
+    if (res.updateAvailable) {
+      body.innerHTML = '<div class="ok" style="font-weight:600">发现新版本 v' + esc(res.latest) + '（当前 v' + esc(res.current) + '）</div><div class="tiny" style="margin-top:8px">请前往发布页下载，再通过飞牛应用中心安装更新。</div><div style="margin-top:10px"><a href="' + esc(urlOf(res.url)) + '" target="_blank" rel="noopener" class="btn sm sky">前往下载</a></div>';
+    } else {
+      body.innerHTML = '<div class="ok" style="font-weight:600">已是最新版本（v' + esc(res.current) + '）</div><div class="tiny" style="margin-top:8px">你的 Lumio 已是最新，无需更新。</div>';
+    }
+  }).catch(function () {
+    if (!body) body = document.getElementById('cuBody');
+    body.innerHTML = '<div class="err">无法连接更新服务器（设备可能未联网）</div>';
+  });
+  return;
+}
+regAct("check-update", actCheckUpdate);

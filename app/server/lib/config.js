@@ -29,5 +29,6 @@ module.exports = {
   UI_DIR,
   SOCKET_PATH,
   PORT,
-  APPNAME
+  APPNAME,
+  APP_DIR
 };
