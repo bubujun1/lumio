@@ -2,19 +2,20 @@
    Lumio · format.js —— 数字与金额格式化 / 日期与截止时间 / 等级表 / 有效期换算
    分层：L0 基础　　依赖：无
    ============================================================ */
+/* 两位数补零：原先在各函数内重复定义的局部 p，收敛为单一模块级导出 */
+export function pad2(x) { return String(x).padStart(2, '0'); }
 export function fmt(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 /* v2.0.49：现金面额展示——家长填多少就是多少，这里只裁掉多余小数位，不做任何换算 */
 export function faceYuan(v) { var n = Math.round((Number(v) || 0) * 100) / 100; return String(n); }
 export function when(iso) {
   if (!iso) return '';
   var d = new Date(iso); if (isNaN(d)) return '';
-  var p = function (x) { return String(x).padStart(2, '0'); };
   var now = new Date();
   var same = d.toDateString() === now.toDateString();
-  if (same) return '今天 ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  if (same) return '今天 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
   var y = new Date(now.getTime() - 86400000);
-  if (d.toDateString() === y.toDateString()) return '昨天 ' + p(d.getHours()) + ':' + p(d.getMinutes());
-  return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  if (d.toDateString() === y.toDateString()) return '昨天 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 /* v2.0.51：距今天数（按本地日界算）：0=今天 1=昨天 2=前天…；无效/缺失返回 9999。
    注意必须用 new Date(y,m,d) 构造本地日界——Date.parse('YYYY-MM-DD') 会按 UTC 解析，早 8 小时。 */
@@ -29,11 +30,10 @@ export function dayDiff(iso) {
 export function wxTime(iso) {
   if (!iso) return '';
   var d = new Date(iso); if (isNaN(d)) return '';
-  var p = function (x) { return String(x).padStart(2, '0'); };
   var now = new Date();
   var day0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   var diff = Math.floor((day0 - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
-  if (diff <= 0) return p(d.getHours()) + ':' + p(d.getMinutes());
+  if (diff <= 0) return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
   if (diff === 1) return '昨天';
   if (diff < 7) return '周' + '日一二三四五六'[d.getDay()];
   if (d.getFullYear() === now.getFullYear()) return (d.getMonth() + 1) + '/' + d.getDate();
@@ -50,8 +50,7 @@ export function dayLabel(iso) {
 }
 /* 限时任务默认截止：明天 20:00（本地时间，datetime-local 格式） */
 function dlStr(d) {
-  var p = function (x) { return String(x).padStart(2, '0'); };
-  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 /* 截止时间快捷选项：今晚 21:00 / 明天 20:00 / 本周日 20:00（已过则顺延一周） */
 export function deadlinePreset(kind) {
@@ -76,21 +75,18 @@ export function deadlineTimeOpts(sel) {
 export function defaultDeadline() {
   var d = new Date(Date.now() + 24 * 3600000);
   d.setHours(20, 0, 0, 0);
-  var p = function (x) { return String(x).padStart(2, '0'); };
-  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 export function fmtDT(iso) {
   if (!iso) return '';
   var d = new Date(iso);
   if (isNaN(d)) return '';
-  var p = function (x) { return String(x).padStart(2, '0'); };
-  return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 /* 本地日期串 YYYY-MM-DD（用本地年月日拼接，不用 toISOString，避免 UTC 偏移差一天） */
 export function localDayStr(d) {
   var x = d ? new Date(d) : new Date();
-  var p = function (n) { return String(n).padStart(2, '0'); };
-  return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
+  return x.getFullYear() + '-' + pad2(x.getMonth() + 1) + '-' + pad2(x.getDate());
 }
 /* 兑换截止日是否已过（与服务端一致：截止日当天全天有效，次日 0 点后才算过期） */
 export function redeemExpired(s) {
@@ -137,6 +133,5 @@ export function fmtExpDate(v) {
   if (m) return m[1] + '.' + m[2] + '.' + m[3];
   var d = new Date(s);
   if (isNaN(d)) return s;
-  var p = function (n) { return String(n).padStart(2, '0'); };
-  return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+  return d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate());
 }

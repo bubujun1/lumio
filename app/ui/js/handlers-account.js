@@ -5,7 +5,7 @@
 import { h, val, qa, q } from './core.js';
 import { toast } from './feedback.js';
 import { S } from './state.js';
-import { openModal } from './ui-kit.js';
+import { openModal, pickChip } from './ui-kit.js';
 import { regAct } from './registry.js';
 import { doAct, confirmAct, confirmDelete } from './actions.js';
 
@@ -47,9 +47,7 @@ regAct("kid-new", actKidNew_KidEdit);
 regAct("kid-edit", actKidNew_KidEdit);
 
 function actPa_Pc(e, el, act, id) {
-    var box = el.parentNode;
-    qa('.pick', box).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on');
+    pickChip(el);
     S._pick[act === 'pa' ? 'avatar' : 'color'] = el.getAttribute('data-v');
     return;
   }
@@ -148,8 +146,7 @@ regAct("quickparent", actParentNew_Quickparent);
 
 function actPt(e, el, act, id) {
     S._pickPT = el.getAttribute('data-v');
-    qa('.pick', el.parentNode).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on');
+    pickChip(el);
     return;
   }
 regAct("pt", actPt);

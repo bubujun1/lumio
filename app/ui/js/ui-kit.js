@@ -2,7 +2,7 @@
    Lumio · ui-kit.js —— 弹层与表单控件：openModal 弹窗栈 / 图标选择器抽屉 / 聊天贴底
    分层：L2 渲染　　依赖：core / icons / state
    ============================================================ */
-import { q, h } from './core.js';
+import { q, qa, h } from './core.js';
 import { ICON_KEY, ICON_SETS } from './icons.js';
 import { S } from './state.js';
 
@@ -17,6 +17,8 @@ export function chatStick() {
   var near = !old || (old.scrollHeight - old.scrollTop - old.clientHeight < 80);
   setTimeout(function () { var sc = q('#chatScroll'); if (sc && near) sc.scrollTop = sc.scrollHeight; }, 0);
 }
+/* pickChip：同容器内反选（移除其余 .pick 的 on）+ 点亮 el 自身；sel 可指定选择器 */
+export function pickChip(el, sel) { qa(sel || '.pick', el.parentNode).forEach(function (x) { x.classList.remove('on'); }); el.classList.add('on'); }
 function modalBodyOf(opts) { return typeof opts.render === 'function' ? opts.render() : (opts.body || ''); }
 export function openModal(opts) {
   var mask = document.createElement('div');

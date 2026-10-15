@@ -49,7 +49,6 @@ function isExpired(task, atMs) { // timed/once 通用：once 由创建/更新时
 }
 
 module.exports = {
-  weekKey,
   periodKeyOf,
   periodLabel,
   taskGroup,

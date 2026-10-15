@@ -26,7 +26,7 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
    版本恒为 0.0.0，且被 catch 静默吞掉、无线索。
    现在改为：从本文件位置逐级上溯 + 校验 appname 确属本应用 + 内置常量兜底，
    并回报来源(source)便于排障。 */
-const APP_VERSION_FALLBACK = '1.0.2';   // 发版时与 manifest 的 version 同步（verify-pack 断言把关）
+const APP_VERSION_FALLBACK = '1.0.3';   // 发版时与 manifest 的 version 同步（verify-pack 断言把关）
 
 function readManifestVersion(file) {
   let txt;

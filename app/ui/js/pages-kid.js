@@ -3,7 +3,7 @@
    分层：L3 页面　　依赖：core / format / icons / state / domain / render / records
    ============================================================ */
 import { h, val, q } from './core.js';
-import { wxTime, dayLabel, coin, fmt, expiryMs, fmtExpDate, when, byAtAsc, dayDiff, localDayStr, faceYuan } from './format.js';
+import { pad2, wxTime, dayLabel, coin, fmt, expiryMs, fmtExpDate, when, byAtAsc, dayDiff, localDayStr, faceYuan } from './format.js';
 import { heroSvg } from './icons.js';
 import { S } from './state.js';
 import { groupOf, isReadBy, convRow } from './domain.js';
@@ -60,9 +60,8 @@ export function taskDeadlineHtml(t) {
   if (isNaN(d)) return '';
   var diff = d.getTime() - Date.now();
   var soon = diff > 0 && diff < 6 * 3600000;
-  var p = function (x) { return String(x).padStart(2, '0'); };
   return '<span class="deadline' + (soon ? ' soon' : '') + '">⏰ 截止 ' +
-    (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p(d.getHours()) + ':' + p(d.getMinutes()) +
+    (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) +
     '（' + h(dayLabel(t.expiresAt)) + '）</span>';
 }
 
@@ -71,10 +70,9 @@ function taskDeadlineShort(t) {
   if (t.type !== 'timed' || !t.expiresAt) return '';
   var d = new Date(t.expiresAt);
   if (isNaN(d.getTime())) return '<span class="deadline">⏰ 有截止时间</span>';
-  var p = function (n) { return String(n).padStart(2, '0'); };
   var soon = (d.getTime() - Date.now()) < 6 * 3600 * 1000;
   return '<span class="deadline' + (soon ? ' soon' : '') + '">⏰ 截止 ' +
-    (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p(d.getHours()) + ':' + p(d.getMinutes()) + '</span>';
+    (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + '</span>';
 }
 
 /* v2.0.46 紧凑任务行：状态由右侧按钮表达，副行承载「次数/期限 + 至多积分」

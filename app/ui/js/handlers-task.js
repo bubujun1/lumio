@@ -6,7 +6,7 @@ import { val, qa, q, h } from './core.js';
 import { fmt, defaultDeadline, deadlineTimeOpts, deadlinePreset, coin } from './format.js';
 import { toast } from './feedback.js';
 import { S } from './state.js';
-import { openModal, iconField, closeModal, syncIconBox } from './ui-kit.js';
+import { openModal, iconField, closeModal, syncIconBox, pickChip } from './ui-kit.js';
 import { taskDeadlineHtml } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct, confirmDelete } from './actions.js';
@@ -162,8 +162,7 @@ function actDlq(e, el, act, id) {
 regAct("dlq", actDlq);
 
 function actPi(e, el, act, id) {
-    qa('.pick', el.parentNode).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on'); S._pickI = el.getAttribute('data-v'); syncIconBox('i'); return;
+    pickChip(el); S._pickI = el.getAttribute('data-v'); syncIconBox('i'); return;
   }
 regAct("pi", actPi);
 

@@ -35,6 +35,10 @@ const MIME = {
   '.map': 'application/json; charset=utf-8'
 };
 
+/* 检查更新成功结果缓存：GitHub 匿名配额 60 次/小时/IP（家庭宽带出口共享，极易耗尽致 403），
+   成功结果缓存 10 分钟，失败不缓存（立即重试仍可打到底层回退）。 */
+let updateCache = null;
+
 function sendJson(res, code, obj) {
   const body = Buffer.from(JSON.stringify(obj), 'utf8');
   res.writeHead(code, {
@@ -201,18 +205,55 @@ const server = http.createServer(async (req, res) => {
           return 0;
         }
         try {
-          const ctrl = new AbortController();
-          const tid = setTimeout(function () { ctrl.abort(); }, 6000);
-          const greq = await fetch('https://api.github.com/repos/bubujun1/lumio/releases/latest', {
-            headers: { 'User-Agent': 'Lumio', 'Accept': 'application/vnd.github+json' }
-          });
-          clearTimeout(tid);
-          if (!greq.ok) { sendJson(res, 200, { ok: false, error: '更新服务器返回 ' + greq.status, current: APP_VERSION }); return; }
-          const gj = await greq.json();
+          // 10 分钟内命中缓存直接返回，不消耗 GitHub 匿名配额
+          if (updateCache && (Date.now() - updateCache.at) < 600000) {
+            sendJson(res, 200, Object.assign({ ok: true, cached: true }, updateCache.data));
+            return;
+          }
+          let gj = null, apiStatus = 0;
+          try {
+            const ctrl = new AbortController();
+            const tid = setTimeout(function () { ctrl.abort(); }, 6000);
+            const greq = await fetch('https://api.github.com/repos/bubujun1/lumio/releases/latest', {
+              headers: { 'User-Agent': 'Lumio', 'Accept': 'application/vnd.github+json' },
+              signal: ctrl.signal
+            });
+            clearTimeout(tid);
+            apiStatus = greq.status;
+            if (greq.ok) gj = await greq.json();
+          } catch (e1) { /* API 不通（断网/被墙），尝试回退 */ }
+          if (!gj && (apiStatus === 403 || apiStatus === 429)) {
+            // 限流/被拦回退：releases/latest 页面以 302 重定向到 /releases/tag/vX.Y.Z，
+            // 不消耗 API 配额；Node fetch(undici) 在 redirect:'manual' 下可读到 Location。
+            try {
+              const ctrl2 = new AbortController();
+              const tid2 = setTimeout(function () { ctrl2.abort(); }, 6000);
+              const freq = await fetch('https://github.com/bubujun1/lumio/releases/latest', {
+                headers: { 'User-Agent': 'Lumio' }, redirect: 'manual', signal: ctrl2.signal
+              });
+              clearTimeout(tid2);
+              const loc = freq.headers.get('location') || '';
+              const m = loc.match(/\/releases\/tag\/v?([0-9]+\.[0-9]+\.[0-9]+)/i);
+              if (m) gj = { tag_name: 'v' + m[1], html_url: 'https://github.com/bubujun1/lumio/releases/tag/v' + m[1] };
+            } catch (e2) { /* 回退也失败，走下方错误分支 */ }
+          }
+          if (!gj) {
+            if (apiStatus === 403 || apiStatus === 429) {
+              sendJson(res, 200, { ok: false, error: 'GitHub 接口暂时限流（匿名配额每小时 60 次，已用完），约 1 小时后自动恢复', current: APP_VERSION });
+            } else if (apiStatus) {
+              sendJson(res, 200, { ok: false, error: '更新服务器返回 ' + apiStatus, current: APP_VERSION });
+            } else {
+              sendJson(res, 200, { ok: false, error: '无法连接更新服务器（设备可能未联网）', current: APP_VERSION });
+            }
+            return;
+          }
           const latest = String(gj.tag_name || '').replace(/^v/i, '');
+          if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(latest)) {
+            sendJson(res, 200, { ok: false, error: '更新服务器返回了无法识别的版本号', current: APP_VERSION });
+            return;
+          }
           const updateAvailable = cmpVer(latest, APP_VERSION) > 0;
-          sendJson(res, 200, {
-            ok: true,
+          const data = {
             current: APP_VERSION,
             versionSource: VER.source,
             versionFallback: VER.fallback,
@@ -220,7 +261,9 @@ const server = http.createServer(async (req, res) => {
             updateAvailable: updateAvailable,
             url: gj.html_url || ('https://github.com/bubujun1/lumio/releases/tag/' + (gj.tag_name || '')),
             published_at: gj.published_at || ''
-          });
+          };
+          updateCache = { at: Date.now(), data: data };
+          sendJson(res, 200, Object.assign({ ok: true }, data));
           return;
         } catch (e) {
           sendJson(res, 200, { ok: false, error: '无法连接更新服务器（设备可能未联网）', current: APP_VERSION });

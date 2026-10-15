@@ -13,6 +13,8 @@ var dpTarget = null, dpY0 = 2016, dpM0 = 1, dpD0 = 1, dpY = 0, dpM = 0, dpD = 0;
 var dpScrollTimer = null, dpMin = null, dpMax = null, dpInitLocating = false, dpWheelAcc = 0, dpDrag = null;
 function dpIso(y, m, d) { return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
 function dpDaysIn(y, m) { return new Date(y, m, 0).getDate(); }
+/* 日期预览统一渲染：原先 5 处重复的同款拼接行 */
+function showDP(y, m, d) { q('#dpPreview').textContent = y + '年' + m + '月' + d + '日'; }
 function dpColIdx(col) {
   var lis = col.querySelectorAll('li'); if (!lis.length) return 0;
   return Math.min(lis.length - 1, Math.max(0, Math.round(col.scrollTop / DP_ITEM)));
@@ -40,7 +42,7 @@ function dpRefillDays() {
   if (dpD > d2) dpD = d2;
   if (dpD < d1) dpD = d1;
   dpColBuild(q('#dpColD'), Array.from({ length: d2 - d1 + 1 }, function (_, i) { return d1 + i; }), dpD, 'd');
-  q('#dpPreview').textContent = dpY + '年' + dpM + '月' + dpD + '日';
+  showDP(dpY, dpM, dpD);
 }
 function dpOnScroll(col, kind) {
   dpInitLocating = false;
@@ -49,7 +51,7 @@ function dpOnScroll(col, kind) {
     var i = dpColIdx(col); col._wIdx = i; dpMarkCur(col, i);
     if (kind === 'y') dpY = dpY0 + i; else if (kind === 'm') dpM = dpM0 + i; else dpD = dpD0 + i;
     if (kind !== 'd') dpRefillDays();
-    q('#dpPreview').textContent = dpY + '年' + dpM + '月' + dpD + '日';
+    showDP(dpY, dpM, dpD);
     dpSyncManual();
   }, 130);
 }
@@ -57,7 +59,7 @@ function dpApplyIdx(col, kind, i) {
   dpMarkCur(col, i);
   if (kind === 'y') dpY = dpY0 + i; else if (kind === 'm') dpM = dpM0 + i; else dpD = dpD0 + i;
   if (kind !== 'd') dpRefillDays();
-  q('#dpPreview').textContent = dpY + '年' + dpM + '月' + dpD + '日';
+  showDP(dpY, dpM, dpD);
   dpSyncManual();
 }
 function dpBindPC(col, kind) {
@@ -109,7 +111,7 @@ function dpManualApply() {
   q('#dpColM').scrollTop = (m - dpM0) * DP_ITEM; dpMarkCur(q('#dpColM'), m - dpM0); q('#dpColM')._wIdx = m - dpM0;
   dpRefillDays();
   q('#dpColD').scrollTop = (dpD - dpD0) * DP_ITEM; dpMarkCur(q('#dpColD'), dpD - dpD0); q('#dpColD')._wIdx = dpD - dpD0;
-  q('#dpPreview').textContent = dpY + '年' + dpM + '月' + dpD + '日';
+  showDP(dpY, dpM, dpD);
   dpSyncManual();
   return true;
 }
@@ -155,7 +157,7 @@ function openDatePicker(inp) {
   dpColBuild(q('#dpColY'), Array.from({ length: y1 - y0 + 1 }, function (_, i) { return y0 + i; }), dpY, 'y');
   dpColBuild(q('#dpColM'), Array.from({ length: mHi - mLo + 1 }, function (_, i) { return mLo + i; }), dpM, 'm');
   dpRefillDays();
-  q('#dpPreview').textContent = dpY + '年' + dpM + '月' + dpD + '日';
+  showDP(dpY, dpM, dpD);
   q('#dpColY').onscroll = function () { dpOnScroll(q('#dpColY'), 'y'); };
   q('#dpColM').onscroll = function () { dpOnScroll(q('#dpColM'), 'm'); };
   q('#dpColD').onscroll = function () { dpOnScroll(q('#dpColD'), 'd'); };

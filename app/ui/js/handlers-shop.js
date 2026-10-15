@@ -6,7 +6,7 @@ import { h, val, qa } from './core.js';
 import { faceYuan, coin, fmt, expiryMs, fmtExpDate } from './format.js';
 import { toast } from './feedback.js';
 import { S } from './state.js';
-import { openIconPicker, openModal, iconField, closeModal, syncIconBox } from './ui-kit.js';
+import { openIconPicker, openModal, iconField, closeModal, syncIconBox, pickChip } from './ui-kit.js';
 import { couponGroup } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct, confirmDelete } from './actions.js';
@@ -78,8 +78,7 @@ regAct("shop-new", actShopNew_ShopEdit);
 regAct("shop-edit", actShopNew_ShopEdit);
 
 function actPe(e, el, act, id) {
-    qa('.pick', el.parentNode).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on'); S._pickE = el.getAttribute('data-v'); syncIconBox('e'); return;
+    pickChip(el); S._pickE = el.getAttribute('data-v'); syncIconBox('e'); return;
   }
 regAct("pe", actPe);
 
@@ -195,7 +194,6 @@ function actCashWithdraw(e, el, act, id) {
 regAct("cash-withdraw", actCashWithdraw);
 
 function actPg(e, el, act, id) {
-    qa('.pick', el.parentNode).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on'); S._pickG = el.getAttribute('data-v'); syncIconBox('g'); return;
+    pickChip(el); S._pickG = el.getAttribute('data-v'); syncIconBox('g'); return;
   }
 regAct("pg", actPg);

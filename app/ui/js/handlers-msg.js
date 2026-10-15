@@ -9,7 +9,7 @@ import { toast } from './feedback.js';
 import { S } from './state.js';
 import { isReadBy } from './domain.js';
 import { paint } from './render.js';
-import { openModal, chatStick, maskOf, refreshTopModal } from './ui-kit.js';
+import { openModal, chatStick, maskOf, refreshTopModal, pickChip } from './ui-kit.js';
 import { chatHtml, isMine, meRefKid, kidBucketOf } from './pages-api.js';
 import { regAct } from './registry.js';
 import { doAct } from './actions.js';
@@ -168,8 +168,7 @@ function actKidMsg(e, el, act, id) {
 regAct("kid-msg", actKidMsg);
 
 function actRecp(e, el, act, id) {
-    qa('.pick.rec', el.parentNode).forEach(function (x) { x.classList.remove('on'); });
-    el.classList.add('on');
+    pickChip(el, '.pick.rec');
     S._recp = { kind: el.getAttribute('data-kind') || 'parents', id: el.getAttribute('data-id') || '', slot: el.getAttribute('data-slot') || '', name: el.getAttribute('data-n') || '' };
     return;
   }
