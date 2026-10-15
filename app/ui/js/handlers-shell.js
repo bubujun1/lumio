@@ -114,7 +114,12 @@ function urlOf(u) {
   return 'https://github.com/bubujun1/lumio/releases';
 }
 function actCheckUpdate(e, el, act, id) {
-  openModal({ title: '检查更新', body: '<div class="tiny" id="cuBody">正在连接更新服务器，请稍候…</div>', okOnly: true, okText: '关闭' });
+  openModal({
+    title: '检查更新',
+    body: '<div class="tiny" id="cuBody">正在连接更新服务器，请稍候…</div>',
+    okOnly: true, okText: '关闭', focus: false,
+    onOk: function () { closeModal(); }
+  });
   var body = document.getElementById('cuBody');
   fetch(APP_BASE + '/api/update/check').then(function (r) { return r.json(); }).then(function (res) {
     if (!body) body = document.getElementById('cuBody');

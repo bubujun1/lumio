@@ -54,7 +54,9 @@ export function openModal(opts) {
   ok.className = 'btn ' + (opts.okClass || '');
   ok.textContent = opts.okText || '确定';
   ok.onclick = function () {
+    /* 兜底：未传 onOk 时默认关闭弹窗——否则确定按钮会成为点了没反应的空壳按钮 */
     if (opts.onOk) opts.onOk(mask, ok);
+    else closeModal();
   };
   acts.appendChild(ok);
   var f = q('input,textarea,select', q('#modalBody', mask));
